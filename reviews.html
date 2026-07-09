@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AquaWorld – Reviews</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  /* ── HOME PAGE CSS VARIABLES  ── */
+  :root {
+    --deep: #0a2a4a;
+    --mid: #1a5276;
+    --sky: #5dade2;
+    --foam: #aed6f1;
+    --pearl: #e8f4fd;
+    --white: #ffffff;
+    --coral: #f0a07a;
+    --gold: #f7c948;
+    --mint: #a8e6cf;
+    --glow: rgba(93,173,226,0.4);
+    /* page extras */
+    --teal: #2db8b0;
+    --light-bg: #f4f9fd;
+    --text-muted: #6b8899;
+  }
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--pearl);
+    color: var(--deep);
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* ── CURSOR ── */
+  .cursor {
+    width: 12px; height: 12px;
+    background: var(--sky); border-radius: 50%;
+    position: fixed; pointer-events: none; z-index: 9999;
+    transition: transform 0.15s ease, background 0.2s;
+    transform: translate(-50%, -50%);
+  }
+  .cursor-ring {
+    width: 36px; height: 36px;
+    border: 1.5px solid var(--sky); border-radius: 50%;
+    position: fixed; pointer-events: none; z-index: 9998;
+    transition: transform 0.4s ease, width 0.3s, height 0.3s, border-color 0.3s;
+    transform: translate(-50%, -50%); opacity: 0.6;
+  }
+  body:has(a:hover) .cursor-ring,
+  body:has(button:hover) .cursor-ring { width: 56px; height: 56px; border-color: var(--coral); }
+
+  /* ── PROGRESS BAR ── */
+  .progress-bar {
+    position: fixed; top: 0; left: 0; height: 3px;
+    background: linear-gradient(90deg, var(--sky), var(--coral));
+    z-index: 9999; width: 0%; transition: width 0.1s;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 60px;
+    backdrop-filter: blur(16px);
+    background: rgba(232,244,253,0.75);
+    border-bottom: 1px solid rgba(93,173,226,0.2);
+    transition: padding 0.3s, box-shadow 0.3s;
+  }
+  nav.scrolled { padding: 14px 60px; box-shadow: 0 4px 30px rgba(10,42,74,0.08); }
+  .logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem; color: var(--mid);
+    display: flex; align-items: center; gap: 10px; text-decoration: none;
+  }
+  .logo span { font-size: 1.6rem; }
+  .nav-links { display: flex; gap: 36px; list-style: none; }
+  .nav-links a {
+    text-decoration: none; color: var(--mid);
+    font-size: 0.9rem; font-weight: 500; letter-spacing: 0.04em;
+    position: relative; padding-bottom: 10px;
+  }
+  .nav-links a::after {
+    content: ''; position: absolute; bottom: 0; left: 0;
+    width: 0; height: 2px; background: var(--sky);
+    transition: width 0.3s ease;
+  }
+  .nav-links a:hover::after { width: 100%; }
+  .nav-links a.active::after { width: 100%; }
+  .nav-cta {
+    background: var(--mid); color: white !important;
+    padding: 10px 24px 16px 24px; border-radius: 50px;
+    transition: background 0.3s, transform 0.2s !important;
+    cursor: none;
+  }
+  .nav-cta:hover { background: var(--sky) !important; transform: translateY(-2px); }
+  .nav-cta::after { display: none !important; }
+
+  /* ── SCROLL REVEAL ── */
+  .reveal { opacity: 0; transform: translateY(40px); transition: opacity 0.7s ease, transform 0.7s ease; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+  .reveal-left { opacity: 0; transform: translateX(-50px); transition: opacity 0.8s ease, transform 0.8s ease; }
+  .reveal-left.visible { opacity: 1; transform: translateX(0); }
+  .reveal-right { opacity: 0; transform: translateX(50px); transition: opacity 0.8s ease, transform 0.8s ease; }
+  .reveal-right.visible { opacity: 1; transform: translateX(0); }
+  .stagger-1 { transition-delay: 0.1s !important; }
+  .stagger-2 { transition-delay: 0.2s !important; }
+  .stagger-3 { transition-delay: 0.3s !important; }
+  .stagger-4 { transition-delay: 0.4s !important; }
+
+  /* ── SECTION COMMONS ── */
+  section { position: relative; z-index: 2; }
+  .section-label {
+    font-size: 0.75rem; letter-spacing: 0.25em; text-transform: uppercase;
+    color: var(--sky); font-weight: 500; margin-bottom: 12px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .section-label::before { content: ''; width: 28px; height: 1.5px; background: var(--sky); }
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 3.5vw, 3rem); color: var(--deep); line-height: 1.2;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 520px; padding: 140px 60px 80px;
+    background: linear-gradient(160deg, #e8f4fd 0%, #aed6f1 40%, #5dade2 100%);
+    display: flex; align-items: center; justify-content: center;
+    text-align: center; position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(ellipse 70% 60% at 50% 120%, rgba(93,173,226,0.15) 0%, transparent 70%);
+  }
+  .hero-bubble {
+    position: absolute; border-radius: 50%;
+    background: rgba(255,255,255,0.4);
+    animation: float 6s ease-in-out infinite;
+  }
+  .hero-bubble:nth-child(1) { width: 80px; height: 80px; top: 20%; left: 8%; animation-delay: 0s; }
+  .hero-bubble:nth-child(2) { width: 40px; height: 40px; top: 60%; left: 15%; animation-delay: 1.5s; }
+  .hero-bubble:nth-child(3) { width: 60px; height: 60px; top: 30%; right: 10%; animation-delay: 0.8s; }
+  .hero-bubble:nth-child(4) { width: 25px; height: 25px; top: 70%; right: 18%; animation-delay: 2.2s; }
+  @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-16px); } }
+  .hero-eyebrow {
+    font-size: 0.8rem; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--mid); font-weight: 500; margin-bottom: 20px;
+    display: flex; align-items: center; justify-content: center; gap: 12px;
+  }
+  .hero-eyebrow::before { content: ''; width: 40px; height: 1.5px; background: var(--sky); }
+  .hero-eyebrow::after  { content: ''; width: 40px; height: 1.5px; background: var(--sky); }
+  .hero-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(3rem, 5.5vw, 5rem);
+    line-height: 1.1; color: var(--deep); margin-bottom: 24px;
+    position: relative; z-index: 1;
+  }
+  .hero-title em { color: var(--sky); font-style: italic; }
+  .hero-sub {
+    font-size: 1.05rem; line-height: 1.7; color: var(--mid);
+    max-width: 500px; margin: 0 auto 44px; font-weight: 300;
+    position: relative; z-index: 1;
+  }
+  .wave-divider { position: absolute; bottom: 0; left: 0; right: 0; }
+
+  /* Rating showcase */
+  .rating-showcase {
+    display: flex; align-items: center; gap: 48px;
+    justify-content: center; flex-wrap: wrap;
+    position: relative; z-index: 1;
+  }
+  .big-rating { text-align: center; }
+  .big-rating .num {
+    font-family: 'Playfair Display', serif;
+    font-size: 4rem; font-weight: 700; color: var(--deep); line-height: 1;
+  }
+  .big-rating .stars { color: var(--gold); font-size: 1.4rem; margin: 6px 0; }
+  .big-rating .count { font-size: 0.82rem; color: var(--mid); opacity: 0.7; }
+  .rating-divider { width: 1px; height: 70px; background: rgba(93,173,226,0.3); }
+  .rating-breakdown { display: flex; flex-direction: column; gap: 7px; }
+  .rb-row { display: flex; align-items: center; gap: 12px; }
+  .rb-label { font-size: 0.75rem; color: var(--mid); width: 24px; font-weight: 500; }
+  .rb-bar { height: 6px; background: rgba(93,173,226,0.15); border-radius: 3px; width: 130px; overflow: hidden; }
+  .rb-fill { height: 100%; background: var(--gold); border-radius: 3px; }
+  .rb-count { font-size: 0.72rem; color: var(--mid); opacity: 0.7; width: 32px; text-align: right; }
+
+  /* ── FEATURED REVIEW ── */
+  #featured { padding: 120px 60px; background: white; }
+  .featured-header { text-align: center; margin-bottom: 60px; }
+  .featured-header .section-label { justify-content: center; }
+  .featured-header .section-sub {
+    font-size: 1rem; color: var(--mid); font-weight: 300;
+    line-height: 1.7; max-width: 500px; margin: 16px auto 0;
+  }
+  .featured-review {
+    max-width: 1000px; margin: 0 auto;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 0;
+    background: var(--pearl); border-radius: 24px; overflow: hidden;
+    box-shadow: 0 8px 40px rgba(10,42,74,0.1);
+  }
+  .featured-review-img {
+    height: 360px; display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(145deg, var(--deep), var(--mid));
+    font-size: 80px; position: relative;
+  }
+  .featured-review-img::before {
+    content: ''; position: absolute;
+    width: 260px; height: 260px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(93,173,226,0.25), transparent);
+    top: -40px; right: -40px;
+  }
+  .tank-badge {
+    position: absolute; bottom: 24px; left: 24px;
+    background: rgba(255,255,255,0.1); backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 10px; padding: 10px 16px; color: white; font-size: 0.8rem;
+  }
+  .tank-badge strong {
+    color: var(--foam); font-size: 1rem;
+    font-family: 'Playfair Display', serif; display: block; margin-bottom: 2px;
+  }
+  .featured-review-content { padding: 44px 44px 44px 40px; display: flex; flex-direction: column; justify-content: center; }
+  .review-stars { color: var(--gold); font-size: 1.1rem; margin-bottom: 20px; letter-spacing: 3px; }
+  .review-quote {
+    font-family: 'Playfair Display', serif; font-size: 1.25rem;
+    color: var(--deep); line-height: 1.65; margin-bottom: 28px; font-style: italic;
+  }
+  .review-quote::before {
+    content: '"'; font-size: 3.5rem; color: rgba(93,173,226,0.2);
+    line-height: 0; vertical-align: -18px; margin-right: 4px;
+  }
+  .reviewer { display: flex; align-items: center; gap: 14px; }
+  .reviewer-avatar {
+    width: 48px; height: 48px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--sky), var(--teal));
+    display: flex; align-items: center; justify-content: center; font-size: 1.3rem;
+    flex-shrink: 0;
+  }
+  .reviewer-name { font-weight: 600; color: var(--deep); font-size: 0.95rem; }
+  .reviewer-info { font-size: 0.78rem; color: var(--mid); opacity: 0.8; margin-top: 2px; }
+  .verified {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 0.72rem; color: var(--teal); font-weight: 600; margin-top: 6px;
+  }
+
+  /* ── REVIEWS GRID ── */
+  #reviews-grid { padding: 60px 60px 120px; background: white; }
+  .grid-header { text-align: center; margin-bottom: 50px; }
+  .grid-header .section-label { justify-content: center; }
+  .reviews-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+  }
+  .review-card {
+    background: var(--pearl); border-radius: 20px; padding: 28px 24px;
+    border: 1px solid rgba(93,173,226,0.12);
+    box-shadow: 0 2px 16px rgba(10,42,74,0.05);
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
+  .review-card:hover { transform: translateY(-6px); box-shadow: 0 14px 36px rgba(10,42,74,0.1); }
+  .card-stars { color: var(--gold); font-size: 0.85rem; margin-bottom: 14px; letter-spacing: 2px; }
+  .card-text { font-size: 0.88rem; color: var(--mid); line-height: 1.7; margin-bottom: 20px; font-weight: 300; }
+  .card-reviewer { display: flex; align-items: center; gap: 10px; }
+  .card-avatar { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
+  .av-blue   { background: linear-gradient(135deg, #e3f2fd, #90caf9); }
+  .av-teal   { background: linear-gradient(135deg, #e0f7fa, #80cbc4); }
+  .av-orange { background: linear-gradient(135deg, #fff3e0, #ffcc80); }
+  .av-purple { background: linear-gradient(135deg, #f3e5f5, #ce93d8); }
+  .av-green  { background: linear-gradient(135deg, #e8f5e9, #a5d6a7); }
+  .av-pink   { background: linear-gradient(135deg, #fce4ec, #f48fb1); }
+  .av-yellow { background: linear-gradient(135deg, #fffde7, #fff176); }
+  .av-red    { background: linear-gradient(135deg, #ffebee, #ef9a9a); }
+  .card-reviewer-name { font-size: 0.88rem; font-weight: 600; color: var(--deep); }
+  .card-reviewer-sub  { font-size: 0.75rem; color: var(--mid); opacity: 0.75; }
+
+  /* ── TRUST BADGES ── */
+  #trust {
+    padding: 120px 60px;
+    background: linear-gradient(180deg, var(--pearl) 0%, #d6eaf8 100%);
+  }
+  .trust-header { text-align: center; margin-bottom: 60px; }
+  .trust-header .section-label { justify-content: center; }
+  .trust-header .section-sub {
+    font-size: 1rem; color: var(--mid); font-weight: 300;
+    line-height: 1.7; max-width: 480px; margin: 16px auto 0;
+  }
+  .trust-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 28px;
+  }
+  .trust-card {
+    background: white; border-radius: 20px; padding: 40px 28px; text-align: center;
+    border: 1px solid rgba(93,173,226,0.15);
+    box-shadow: 0 4px 24px rgba(10,42,74,0.06);
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
+  .trust-card:hover { transform: translateY(-6px); box-shadow: 0 16px 44px rgba(10,42,74,0.1); }
+  .trust-icon { font-size: 2.4rem; margin-bottom: 16px; display: block; }
+  .trust-num {
+    font-family: 'Playfair Display', serif; font-size: 2.4rem;
+    font-weight: 700; color: var(--mid);
+  }
+  .trust-label { font-size: 0.82rem; color: var(--mid); margin-top: 8px; line-height: 1.5; font-weight: 300; }
+
+  /* ── CTA (matches home newsletter section) ── */
+  #cta {
+    padding: 100px 60px;
+    background: linear-gradient(135deg, #aed6f1, #5dade2 50%, #1a5276);
+    text-align: center; position: relative; overflow: hidden;
+  }
+  #cta .section-label { justify-content: center; color: rgba(255,255,255,0.7); }
+  #cta .section-label::before { background: rgba(255,255,255,0.7); }
+  #cta .section-title { color: white; margin-bottom: 16px; }
+  #cta .section-sub {
+    font-size: 1rem; color: rgba(255,255,255,0.8); font-weight: 300;
+    line-height: 1.7; max-width: 460px; margin: 0 auto 44px;
+  }
+  .cta-group { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+  .btn-primary {
+    background: white; color: var(--mid); padding: 16px 36px;
+    border-radius: 50px; text-decoration: none; font-weight: 500;
+    font-size: 0.95rem; letter-spacing: 0.04em;
+    transition: all 0.3s ease; box-shadow: 0 8px 30px rgba(10,42,74,0.2);
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .btn-primary:hover { background: var(--pearl); transform: translateY(-3px); box-shadow: 0 14px 40px rgba(10,42,74,0.3); }
+  .btn-outline-white {
+    border: 1.5px solid rgba(255,255,255,0.6); color: white;
+    padding: 15px 32px; border-radius: 50px; text-decoration: none;
+    font-weight: 500; font-size: 0.95rem; letter-spacing: 0.04em;
+    transition: all 0.3s ease; background: transparent;
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .btn-outline-white:hover { background: rgba(255,255,255,0.15); border-color: white; transform: translateY(-3px); }
+
+  /* ── FOOTER  ── */
+  footer { background: var(--deep); color: rgba(255,255,255,0.7); padding: 80px 60px 40px; }
+  .footer-top { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 60px; margin-bottom: 60px; }
+  .footer-brand .logo { color: var(--foam); margin-bottom: 16px; }
+  .footer-brand p { font-size: 0.88rem; line-height: 1.7; max-width: 260px; font-weight: 300; }
+  .footer-col h5 { color: white; font-size: 0.85rem; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 20px; font-weight: 500; }
+  .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  .footer-col ul li a { color: rgba(255,255,255,0.55); text-decoration: none; font-size: 0.88rem; transition: color 0.3s; }
+  .footer-col ul li a:hover { color: var(--sky); }
+  .footer-bottom {
+    border-top: 1px solid rgba(255,255,255,0.1); padding-top: 32px;
+    display: flex; align-items: center; justify-content: space-between; font-size: 0.82rem;
+  }
+  .social-links { display: flex; gap: 16px; }
+  .social-links a {
+    width: 38px; height: 38px; border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.15);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem; text-decoration: none; color: white; transition: all 0.3s;
+  }
+  .social-links a:hover { background: var(--sky); border-color: var(--sky); }
+
+  /* ── CONSULTATION POPUP  ── */
+  .popup-overlay {
+    position: fixed; inset: 0; z-index: 10000;
+    background: rgba(10,42,74,0.65); backdrop-filter: blur(6px);
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.35s ease; padding: 20px;
+  }
+  .popup-overlay.active { opacity: 1; pointer-events: all; }
+  .popup-box {
+    background: white; border-radius: 28px; max-width: 560px; width: 100%;
+    padding: 52px 48px; position: relative;
+    box-shadow: 0 40px 100px rgba(10,42,74,0.3);
+    transform: translateY(30px) scale(0.96);
+    transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1); overflow: hidden;
+  }
+  .popup-overlay.active .popup-box { transform: translateY(0) scale(1); }
+  .popup-box::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 5px;
+    background: linear-gradient(90deg, var(--sky), var(--coral), var(--sky));
+  }
+  .popup-box::after {
+    content: '🐠'; position: absolute; top: 18px; right: 64px;
+    font-size: 2.2rem; opacity: 0.15; pointer-events: none;
+  }
+  .popup-close {
+    position: absolute; top: 18px; right: 20px;
+    width: 36px; height: 36px; border-radius: 50%;
+    border: 1.5px solid rgba(93,173,226,0.25); background: var(--pearl);
+    display: flex; align-items: center; justify-content: center;
+    cursor: none; font-size: 1rem; color: var(--mid); transition: all 0.2s; line-height: 1;
+  }
+  .popup-close:hover { background: var(--sky); color: white; border-color: var(--sky); }
+  .popup-eyebrow {
+    font-size: 0.72rem; letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--sky); font-weight: 500; margin-bottom: 10px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .popup-eyebrow::before { content: ''; width: 22px; height: 1.5px; background: var(--sky); }
+  .popup-box h2 { font-family: 'Playfair Display', serif; font-size: 1.9rem; color: var(--deep); line-height: 1.2; margin-bottom: 8px; }
+  .popup-box > p { font-size: 0.88rem; color: var(--mid); font-weight: 300; line-height: 1.6; margin-bottom: 32px; }
+  .consult-form { display: flex; flex-direction: column; gap: 16px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group label { font-size: 0.78rem; font-weight: 500; color: var(--mid); letter-spacing: 0.04em; text-transform: uppercase; }
+  .form-group input, .form-group select, .form-group textarea {
+    padding: 13px 16px; border: 1.5px solid rgba(93,173,226,0.25); border-radius: 12px;
+    font-family: 'DM Sans', sans-serif; font-size: 0.9rem; color: var(--deep);
+    background: var(--pearl); outline: none;
+    transition: border-color 0.25s, box-shadow 0.25s; cursor: text;
+  }
+  .form-group select { cursor: none; }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+    border-color: var(--sky); box-shadow: 0 0 0 3px rgba(93,173,226,0.12); background: white;
+  }
+  .form-group textarea { resize: vertical; min-height: 88px; line-height: 1.5; }
+  .form-group input::placeholder, .form-group textarea::placeholder { color: rgba(26,82,118,0.35); }
+  .submit-btn {
+    margin-top: 6px; padding: 16px 32px; border-radius: 50px;
+    background: var(--mid); color: white; border: none;
+    font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 500;
+    letter-spacing: 0.04em; cursor: none; transition: all 0.3s;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    box-shadow: 0 8px 28px rgba(26,82,118,0.28);
+  }
+  .submit-btn:hover { background: var(--sky); transform: translateY(-2px); box-shadow: 0 14px 36px rgba(93,173,226,0.35); }
+  .submit-btn span { font-size: 1.1rem; }
+  .popup-success { display: none; flex-direction: column; align-items: center; text-align: center; gap: 14px; padding: 20px 0 10px; }
+  .popup-success.show { display: flex; }
+  .success-icon { font-size: 3.5rem; animation: popIn 0.5s cubic-bezier(0.34,1.56,0.64,1); }
+  @keyframes popIn { from { transform: scale(0); } to { transform: scale(1); } }
+  .popup-success h3 { font-family: 'Playfair Display', serif; font-size: 1.5rem; color: var(--deep); }
+  .popup-success p { font-size: 0.9rem; color: var(--mid); font-weight: 300; max-width: 320px; line-height: 1.6; }
+
+  /* ── MOBILE ── */
+  @media (max-width: 768px) {
+    nav { padding: 16px 24px; }
+    .nav-links { display: none; }
+    .hero { padding: 100px 24px 60px; }
+    .rating-showcase { gap: 24px; }
+    .rating-divider { display: none; }
+    #featured, #reviews-grid, #trust, #cta { padding: 80px 24px; }
+    .featured-review { grid-template-columns: 1fr; }
+    .featured-review-img { height: 220px; }
+    .featured-review-content { padding: 28px 24px; }
+    .reviews-grid { grid-template-columns: 1fr 1fr; }
+    .trust-grid { grid-template-columns: 1fr 1fr; }
+    .footer-top { grid-template-columns: 1fr 1fr; gap: 40px; }
+    .popup-box { padding: 40px 28px; }
+    .form-row { grid-template-columns: 1fr; }
+    .cta-group { flex-direction: column; align-items: center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- CURSOR -->
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- ══════ CONSULTATION POPUP ══════ -->
+<div class="popup-overlay" id="consultPopup">
+  <div class="popup-box">
+    <button class="popup-close" id="popupClose" title="Close">✕</button>
+    <div id="formContent">
+      <div class="popup-eyebrow">Free Consultation</div>
+      <h2>Book Your<br>Aquarium Consultation</h2>
+      <p>Tell us about your space and vision — our expert aquarists will reach out within 24 hours to design your perfect tank.</p>
+      <div class="consult-form" id="consultForm">
+        <div class="form-row">
+          <div class="form-group"><label>First Name</label><input type="text" placeholder="e.g. Sarah" id="fname"></div>
+          <div class="form-group"><label>Last Name</label><input type="text" placeholder="e.g. Khan" id="lname"></div>
+        </div>
+        <div class="form-group"><label>Email Address</label><input type="email" placeholder="you@example.com" id="email"></div>
+        <div class="form-group"><label>Phone Number</label><input type="tel" placeholder="+92 300 0000000" id="phone"></div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Tank Type</label>
+            <select id="tankType">
+              <option value="">Select a type…</option>
+              <option>Freshwater Tank</option>
+              <option>Marine / Reef Tank</option>
+              <option>Nano Aquarium</option>
+              <option>Custom Built-in</option>
+              <option>Office / Commercial</option>
+              <option>Not sure yet</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Preferred Date</label><input type="date" id="prefDate"></div>
+        </div>
+        <div class="form-group">
+          <label>Tell us about your space</label>
+          <textarea placeholder="e.g. Living room wall, approx 2m wide. Looking for a reef setup with colourful fish…" id="message"></textarea>
+        </div>
+        <button class="submit-btn" id="submitBtn">Book Free Consultation <span>🐟</span></button>
+      </div>
+    </div>
+    <div class="popup-success" id="successMsg">
+      <div class="success-icon">🎉</div>
+      <h3>You're all booked in!</h3>
+      <p>Thank you! One of our expert aquarists will contact you within 24 hours to discuss your dream aquarium.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ NAV (home page exact) ══════ -->
+<nav id="navbar">
+  <a href="Home.html" class="logo"><span>🐟</span> AquaWorld</a>
+  <ul class="nav-links">
+    <li><a href="Home.html">Home</a></li>
+    <li><a href="about.html">About Us</a></li>
+    <li><a href="features.html">Features</a></li>
+    <li><a href="collection.html">Collection</a></li>
+    <li><a href="aquariums.html">Aquarium</a></li>
+    <li><a href="process.html">Process</a></li>
+    <li><a href="reviews.html" class="active">Reviews</a></li>
+    <li><a href="#" class="nav-cta" id="openConsult">Contact Us</a></li>
+  </ul>
+</nav>
+
+<!-- ══════ HERO ══════ -->
+<section class="hero">
+  <div class="hero-bubble"></div>
+  <div class="hero-bubble"></div>
+  <div class="hero-bubble"></div>
+  <div class="hero-bubble"></div>
+  <svg class="wave-divider" viewBox="0 0 1440 80" preserveAspectRatio="none" style="height:80px;">
+    <path d="M0,60 C240,20 480,80 720,50 C960,20 1200,70 1440,40 L1440,80 L0,80 Z" fill="white"/>
+  </svg>
+  <div style="position:relative;z-index:1;text-align:center;">
+    <div class="hero-eyebrow">Customer Reviews</div>
+    <h1 class="hero-title reveal">What Our <em>Aquarists</em><br>Say About Us</h1>
+    <p class="hero-sub reveal">Over 2,400 verified reviews from aquarium owners who transformed their spaces with AquaWorld.</p>
+    <div class="rating-showcase reveal">
+      <div class="big-rating">
+        <div class="num">4.9</div>
+        <div class="stars">★★★★★</div>
+        <div class="count">Based on 2,412 reviews</div>
+      </div>
+      <div class="rating-divider"></div>
+      <div class="rating-breakdown">
+        <div class="rb-row"><span class="rb-label">5★</span><div class="rb-bar"><div class="rb-fill" style="width:92%"></div></div><span class="rb-count">2219</span></div>
+        <div class="rb-row"><span class="rb-label">4★</span><div class="rb-bar"><div class="rb-fill" style="width:6%"></div></div><span class="rb-count">145</span></div>
+        <div class="rb-row"><span class="rb-label">3★</span><div class="rb-bar"><div class="rb-fill" style="width:2%"></div></div><span class="rb-count">36</span></div>
+        <div class="rb-row"><span class="rb-label">2★</span><div class="rb-bar"><div class="rb-fill" style="width:0.5%"></div></div><span class="rb-count">8</span></div>
+        <div class="rb-row"><span class="rb-label">1★</span><div class="rb-bar"><div class="rb-fill" style="width:0.2%"></div></div><span class="rb-count">4</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════ FEATURED REVIEW ══════ -->
+<section id="featured">
+  <div class="featured-header reveal">
+    <div class="section-label">Top Pick</div>
+    <h2 class="section-title">Featured Review</h2>
+    <p class="section-sub">Real stories from real customers — verified purchases, genuine experiences.</p>
+  </div>
+  <div class="featured-review reveal">
+    <div class="featured-review-img">
+      🐠
+      <div class="tank-badge"><strong>Apex 200L</strong>Reef Build</div>
+    </div>
+    <div class="featured-review-content">
+      <div class="review-stars">★★★★★</div>
+      <p class="review-quote">The Apex 200L transformed my living room. I've never felt more relaxed watching it — the monitoring system gives me total peace of mind when I travel.</p>
+      <div class="reviewer">
+        <div class="reviewer-avatar">😊</div>
+        <div>
+          <div class="reviewer-name">James R.</div>
+          <div class="reviewer-info">London, UK · Apex 200L Customer</div>
+          <div class="verified">✓ Verified Purchase</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════ REVIEWS GRID ══════ -->
+<section id="reviews-grid">
+  <div class="grid-header reveal">
+    <div class="section-label">All Reviews</div>
+    <h2 class="section-title">What Everyone's Saying</h2>
+  </div>
+  <div class="reviews-grid">
+    <div class="review-card reveal stagger-1">
+      <div class="card-stars">★★★★★</div>
+      <p class="card-text">The setup team was incredible. More beautiful than any showroom I'd visited. The aquascape they designed exceeded every expectation I had going in.</p>
+      <div class="card-reviewer"><div class="card-avatar av-teal">👩</div><div><div class="card-reviewer-name">Sarah K.</div><div class="card-reviewer-sub">Studio 60L · Planted Tank</div></div></div>
+    </div>
+    <div class="review-card reveal stagger-2">
+      <div class="card-stars">★★★★★</div>
+      <p class="card-text">The app monitoring is a game changer. I check my tank from the office daily. Knowing everything is in range brings me actual peace of mind.</p>
+      <div class="card-reviewer"><div class="card-avatar av-blue">👨</div><div><div class="card-reviewer-name">Mike T.</div><div class="card-reviewer-sub">Apex 200L · Community Tank</div></div></div>
+    </div>
+    <div class="review-card reveal stagger-3">
+      <div class="card-stars">★★★★★</div>
+      <p class="card-text">We've had three AquaWorld tanks in our office now. Clients comment on them every single day. The care team keeps them absolutely immaculate.</p>
+      <div class="card-reviewer"><div class="card-avatar av-orange">👩‍💼</div><div><div class="card-reviewer-name">Priya M.</div><div class="card-reviewer-sub">Commercial · 3× Tanks</div></div></div>
+    </div>
+    <div class="review-card reveal stagger-4">
+      <div class="card-stars">★★★★★</div>
+      <p class="card-text">As a beginner I was nervous, but the consultation made it so easy. My 60L planted tank has been running perfectly for 8 months. No losses, total joy.</p>
+      <div class="card-reviewer"><div class="card-avatar av-purple">🧑</div><div><div class="card-reviewer-name">Oliver D.</div><div class="card-reviewer-sub">Studio 60L · Beginner</div></div></div>
+    </div>
+    <div class="review-card reveal stagger-1">
+      <div class="card-stars">★★★★★</div>
+      <p class="card-text">The coral selection is unmatched. My Torch coral and hammer coral are thriving together — something I struggled to achieve on my own for years.</p>
+      <div class="card-reviewer"><div class="card-avatar av-green">🧑‍🔬</div><div><div class="card-reviewer-name">Rachel F.</div><div class="card-reviewer-sub">Reef Master 600L</div></div></div>
+    </div>
+    <div class="review-card reveal stagger-2">
+      <div class="card-stars">★★★★★</div>
+      <p class="card-text">The monthly visits from the care team are worth every penny. They caught an ammonia spike before it became a problem. Brilliant service all around.</p>
+      <div class="card-reviewer"><div class="card-avatar av-yellow">👴</div><div><div class="card-reviewer-name">David W.</div><div class="card-reviewer-sub">Apex 200L · Complete Plan</div></div></div>
+    </div>
+    <div class="review-card reveal stagger-3">
+      <div class="card-stars">★★★★★</div>
+      <p class="card-text">I ordered a Dwarf Octopus and it arrived in perfect health. The acclimatisation kit and care guide made the whole process stress-free. Amazing team.</p>
+      <div class="card-reviewer"><div class="card-avatar av-pink">👩‍🎨</div><div><div class="card-reviewer-name">Amara L.</div><div class="card-reviewer-sub">Invertebrate Collection</div></div></div>
+    </div>
+    <div class="review-card reveal stagger-4">
+      <div class="card-stars">★★★★☆</div>
+      <p class="card-text">The 3D render process was brilliant — seeing exactly how my aquascape would look before committing was incredibly reassuring. Would highly recommend.</p>
+      <div class="card-reviewer"><div class="card-avatar av-red">👨‍💻</div><div><div class="card-reviewer-name">Tom B.</div><div class="card-reviewer-sub">Nano Cube 15L · Shrimp</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════ TRUST STATS ══════ -->
+<section id="trust">
+  <div class="trust-header reveal">
+    <div class="section-label">Our Track Record</div>
+    <h2 class="section-title">Trusted by Thousands<br>of Aquarium Owners</h2>
+    <p class="section-sub">Numbers that reflect our commitment to quality, service, and the long-term health of every aquarium we build.</p>
+  </div>
+  <div class="trust-grid">
+    <div class="trust-card reveal stagger-1">
+      <span class="trust-icon">⭐</span>
+      <div class="trust-num">4.9/5</div>
+      <div class="trust-label">Average review score across 2,400+ verified customers</div>
+    </div>
+    <div class="trust-card reveal stagger-2">
+      <span class="trust-icon">🐠</span>
+      <div class="trust-num">98%</div>
+      <div class="trust-label">Species survival rate on all livestock deliveries</div>
+    </div>
+    <div class="trust-card reveal stagger-3">
+      <span class="trust-icon">🏠</span>
+      <div class="trust-num">12K+</div>
+      <div class="trust-label">Happy aquarium owners across 34 countries worldwide</div>
+    </div>
+    <div class="trust-card reveal stagger-4">
+      <span class="trust-icon">🔄</span>
+      <div class="trust-num">94%</div>
+      <div class="trust-label">Customer retention rate on ongoing maintenance plans</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════ CTA ══════ -->
+<section id="cta">
+  <div class="section-label reveal">Join Our Community</div>
+  <h2 class="section-title reveal">Ready to Write Your<br>Own Success Story?</h2>
+  <p class="section-sub reveal">Join 12,000+ satisfied aquarium owners. Start with a free consultation and let us build something extraordinary.</p>
+  <div class="cta-group reveal">
+    <a href="#" class="btn-primary" id="openConsult2">Book Free Consultation 🐟</a>
+    <a href="collection.html" class="btn-outline-white">Browse Collection →</a>
+  </div>
+</section>
+
+<!-- ══════ FOOTER (home page exact) ══════ -->
+<footer>
+  <div class="footer-top">
+    <div class="footer-brand">
+      <a href="Home.html" class="logo"><span>🐟</span> AquaWorld</a>
+      <p>Creating stunning underwater worlds for homes, offices and public spaces since 2008. Certified, ethical, extraordinary.</p>
+    </div>
+    <div class="footer-col">
+      <h5>Aquariums</h5>
+      <ul>
+        <li><a href="collection.html">Nano Cube 30L</a></li>
+        <li><a href="collection.html">Reef Panorama 200L</a></li>
+        <li><a href="collection.html">Dutch Planted 120L</a></li>
+        <li><a href="collection.html">Blackwater Biotope 180L</a></li>
+        <li><a href="collection.html">Apex Wall Display 600L</a></li>
+        <li><a href="collection.html">Iwagumi Office Divider 350L</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h5>Services</h5>
+      <ul>
+        <li><a href="#">Tank Installation</a></li>
+        <li><a href="#">Monthly Maintenance</a></li>
+        <li><a href="#">Aquascape Design</a></li>
+        <li><a href="#">Water Testing</a></li>
+        <li><a href="#">Emergency Callout</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h5>Company</h5>
+      <ul>
+        <li><a href="about.html">About Us</a></li>
+        <li><a href="features.html">Features</a></li>
+        <li><a href="collection.html">Collection</a></li>
+        <li><a href="aquariums.html">Aquarium</a></li>
+        <li><a href="process.html">Process</a></li>
+        <li><a href="reviews.html">Reviews</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2026 AquaWorld. Designed and Developed by Maryam, Hania, Muntaha and Ayesha</p>
+     </div>
+</footer>
+
+<script>
+// ── CURSOR ──
+const cursor = document.getElementById('cursor');
+const ring = document.getElementById('cursorRing');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove', e => {
+  mx = e.clientX; my = e.clientY;
+  cursor.style.left = mx+'px'; cursor.style.top = my+'px';
+});
+function animateRing() {
+  rx += (mx - rx) * 0.12; ry += (my - ry) * 0.12;
+  ring.style.left = rx+'px'; ring.style.top = ry+'px';
+  requestAnimationFrame(animateRing);
+}
+animateRing();
+
+// ── SCROLL PROGRESS ──
+const pbar = document.getElementById('progressBar');
+window.addEventListener('scroll', () => {
+  const h = document.documentElement;
+  pbar.style.width = (window.scrollY / (h.scrollHeight - h.clientHeight)) * 100 + '%';
+});
+
+// ── NAV SCROLL ──
+const navbar = document.getElementById('navbar');
+window.addEventListener('scroll', () => {
+  navbar.classList.toggle('scrolled', window.scrollY > 60);
+});
+
+// ── SCROLL REVEAL ──
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.12 });
+document.querySelectorAll('.reveal,.reveal-left,.reveal-right').forEach(el => observer.observe(el));
+
+// ── POPUP ──
+const popup = document.getElementById('consultPopup');
+const popupClose = document.getElementById('popupClose');
+const openConsult = document.getElementById('openConsult');
+const openConsult2 = document.getElementById('openConsult2');
+const submitBtn = document.getElementById('submitBtn');
+const formContent = document.getElementById('formContent');
+const successMsg = document.getElementById('successMsg');
+
+function openPopup(e) {
+  if (e) e.preventDefault();
+  popup.classList.add('active');
+  document.body.style.overflow = 'hidden';
+  formContent.style.display = '';
+  successMsg.classList.remove('show');
+}
+function closePopup() {
+  popup.classList.remove('active');
+  document.body.style.overflow = '';
+}
+openConsult.addEventListener('click', openPopup);
+openConsult2.addEventListener('click', openPopup);
+popupClose.addEventListener('click', closePopup);
+popup.addEventListener('click', e => { if (e.target === popup) closePopup(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closePopup(); });
+submitBtn.addEventListener('click', () => {
+  const fname = document.getElementById('fname').value.trim();
+  const email = document.getElementById('email').value.trim();
+  if (!fname) { document.getElementById('fname').focus(); return; }
+  if (!email || !email.includes('@')) { document.getElementById('email').focus(); return; }
+  formContent.style.display = 'none';
+  successMsg.classList.add('show');
+  setTimeout(() => closePopup(), 3500);
+});
+</script>
+</body>
+</html>

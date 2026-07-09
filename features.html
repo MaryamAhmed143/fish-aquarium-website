@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AquaWorld – Features</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --deep: #0a2a4a;
+    --mid: #1a5276;
+    --sky: #5dade2;
+    --foam: #aed6f1;
+    --pearl: #e8f4fd;
+    --white: #ffffff;
+    --coral: #f0a07a;
+    --gold: #f7c948;
+    --mint: #a8e6cf;
+    --glow: rgba(93,173,226,0.4);
+    --teal: #2db8b0;
+    --ocean: #4a9eca;
+    --light-bg: #f4f9fd;
+    --text-muted: #6b8899;
+    --green: #43b89c;
+  }
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--pearl); color: var(--deep); overflow-x: hidden; cursor: none; }
+
+  /* ── CURSOR ── */
+  .cursor { width: 12px; height: 12px; background: var(--sky); border-radius: 50%; position: fixed; pointer-events: none; z-index: 9999; transition: transform 0.15s ease, background 0.2s; transform: translate(-50%, -50%); }
+  .cursor-ring { width: 36px; height: 36px; border: 1.5px solid var(--sky); border-radius: 50%; position: fixed; pointer-events: none; z-index: 9998; transition: transform 0.4s ease, width 0.3s, height 0.3s, border-color 0.3s; transform: translate(-50%, -50%); opacity: 0.6; }
+  body:has(a:hover) .cursor-ring, body:has(button:hover) .cursor-ring { width: 56px; height: 56px; border-color: var(--coral); }
+
+  /* ── PROGRESS BAR ── */
+  .progress-bar { position: fixed; top: 0; left: 0; height: 3px; background: linear-gradient(90deg, var(--sky), var(--coral)); z-index: 9999; width: 0%; transition: width 0.1s; }
+
+  /* ════════════════════════════════════════
+     NAV — FULLY RESPONSIVE
+  ════════════════════════════════════════ */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    backdrop-filter: blur(16px);
+    background: rgba(232,244,253,0.92);
+    border-bottom: 1px solid rgba(93,173,226,0.2);
+    transition: box-shadow 0.3s;
+  }
+  .nav-inner {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 60px;
+    transition: padding 0.3s;
+  }
+  nav.scrolled .nav-inner { padding: 12px 60px; }
+  nav.scrolled { box-shadow: 0 4px 30px rgba(10,42,74,0.08); }
+
+  .logo { font-family: 'Playfair Display', serif; font-size: 1.5rem; color: var(--mid); display: flex; align-items: center; gap: 10px; text-decoration: none; flex-shrink: 0; }
+  .logo span { font-size: 1.6rem; }
+
+  .nav-links { display: flex; gap: 28px; list-style: none; align-items: center; }
+  .nav-links a { text-decoration: none; color: var(--mid); font-size: 0.88rem; font-weight: 500; letter-spacing: 0.04em; position: relative; padding-bottom: 10px; white-space: nowrap; }
+  .nav-links a::after { content: ''; position: absolute; bottom: 0; left: 0; width: 0; height: 2px; background: var(--sky); transition: width 0.3s ease; }
+  .nav-links a:hover::after, .nav-links a.active::after { width: 100%; }
+  .nav-cta { background: var(--mid); color: white !important; padding: 10px 22px 16px 22px; border-radius: 50px; transition: background 0.3s, transform 0.2s !important; cursor: none; }
+  .nav-cta:hover { background: var(--sky) !important; transform: translateY(-2px); }
+  .nav-cta::after { display: none !important; }
+
+  /* Hamburger */
+  .nav-toggle { display: none; flex-direction: column; gap: 5px; background: none; border: none; cursor: none; padding: 6px; border-radius: 8px; transition: background 0.2s; }
+  .nav-toggle:hover { background: rgba(93,173,226,0.12); }
+  .nav-toggle span { display: block; width: 24px; height: 2px; background: var(--mid); border-radius: 2px; transition: transform 0.3s ease, opacity 0.3s ease, width 0.3s ease; transform-origin: center; }
+  .nav-toggle.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .nav-toggle.open span:nth-child(2) { opacity: 0; width: 0; }
+  .nav-toggle.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+  /* Mobile drawer */
+  .nav-drawer { display: none; flex-direction: column; background: rgba(232,244,253,0.98); border-top: 1px solid rgba(93,173,226,0.15); max-height: 0; overflow: hidden; transition: max-height 0.4s ease, padding 0.3s ease; }
+  .nav-drawer.open { max-height: 500px; padding: 16px 0 20px; }
+  .nav-drawer a { display: block; text-decoration: none; color: var(--mid); font-size: 0.95rem; font-weight: 500; padding: 12px 24px; border-bottom: 1px solid rgba(93,173,226,0.08); transition: background 0.2s, color 0.2s; }
+  .nav-drawer a:last-child { border-bottom: none; }
+  .nav-drawer a:hover, .nav-drawer a.active { background: rgba(93,173,226,0.08); color: var(--sky); }
+  .nav-drawer .drawer-cta { margin: 12px 24px 0; display: block; background: var(--mid); color: white !important; text-align: center; padding: 12px 24px; border-radius: 50px; border-bottom: none; transition: background 0.3s; }
+  .nav-drawer .drawer-cta:hover { background: var(--sky) !important; }
+
+  /* ── SCROLL REVEAL ── */
+  .reveal { opacity: 0; transform: translateY(40px); transition: opacity 0.7s ease, transform 0.7s ease; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+  .reveal-left { opacity: 0; transform: translateX(-50px); transition: opacity 0.8s ease, transform 0.8s ease; }
+  .reveal-left.visible { opacity: 1; transform: translateX(0); }
+  .reveal-right { opacity: 0; transform: translateX(50px); transition: opacity 0.8s ease, transform 0.8s ease; }
+  .reveal-right.visible { opacity: 1; transform: translateX(0); }
+  .stagger-1 { transition-delay: 0.1s !important; }
+  .stagger-2 { transition-delay: 0.2s !important; }
+  .stagger-3 { transition-delay: 0.3s !important; }
+  .stagger-4 { transition-delay: 0.4s !important; }
+
+  /* ── SECTION COMMONS ── */
+  section { position: relative; z-index: 2; }
+  .section-label { font-size: 0.75rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--sky); font-weight: 500; margin-bottom: 12px; display: flex; align-items: center; gap: 10px; }
+  .section-label::before { content: ''; width: 28px; height: 1.5px; background: var(--sky); }
+  .section-title { font-family: 'Playfair Display', serif; font-size: clamp(2rem, 3.5vw, 3rem); color: var(--deep); line-height: 1.2; }
+
+  /* ── HERO ── */
+  .hero { min-height: 520px; padding: 140px 60px 80px; background: linear-gradient(160deg, #e8f4fd 0%, #aed6f1 40%, #5dade2 100%); display: flex; align-items: center; justify-content: center; text-align: center; position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 70% 60% at 50% 120%, rgba(93,173,226,0.15) 0%, transparent 70%); }
+  .hero-bubble { position: absolute; border-radius: 50%; background: rgba(255,255,255,0.4); animation: float 6s ease-in-out infinite; }
+  .hero-bubble:nth-child(1) { width: 80px; height: 80px; top: 20%; left: 8%; animation-delay: 0s; }
+  .hero-bubble:nth-child(2) { width: 40px; height: 40px; top: 60%; left: 15%; animation-delay: 1.5s; }
+  .hero-bubble:nth-child(3) { width: 60px; height: 60px; top: 30%; right: 10%; animation-delay: 0.8s; }
+  .hero-bubble:nth-child(4) { width: 25px; height: 25px; top: 70%; right: 18%; animation-delay: 2.2s; }
+  @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-16px); } }
+  .hero-eyebrow { font-size: 0.8rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--mid); font-weight: 500; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; gap: 12px; }
+  .hero-eyebrow::before { content: ''; width: 40px; height: 1.5px; background: var(--sky); }
+  .hero-eyebrow::after  { content: ''; width: 40px; height: 1.5px; background: var(--sky); }
+  .hero-title { font-family: 'Playfair Display', serif; font-size: clamp(2.4rem, 5.5vw, 5rem); line-height: 1.1; color: var(--deep); margin-bottom: 24px; position: relative; z-index: 1; }
+  .hero-title em { color: var(--sky); font-style: italic; }
+  .hero-sub { font-size: 1.05rem; line-height: 1.7; color: var(--mid); max-width: 520px; margin: 0 auto 44px; font-weight: 300; position: relative; z-index: 1; }
+  .hero-stats { display: flex; gap: 48px; justify-content: center; position: relative; z-index: 1; flex-wrap: wrap; }
+  .stat-item h3 { font-family: 'Playfair Display', serif; font-size: 2rem; color: var(--mid); line-height: 1; }
+  .stat-item p { font-size: 0.8rem; color: var(--mid); opacity: 0.7; margin-top: 4px; letter-spacing: 0.05em; text-transform: uppercase; }
+  .wave-divider { position: absolute; bottom: 0; left: 0; right: 0; }
+
+  /* ── FEATURES GRID ── */
+  #features { padding: 120px 60px; background: white; }
+  .features-header { text-align: center; margin-bottom: 80px; }
+  .features-header .section-label { justify-content: center; }
+  .features-header .section-sub { font-size: 1rem; color: var(--mid); font-weight: 300; line-height: 1.7; max-width: 500px; margin: 16px auto 0; }
+  .features-grid-inner { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; }
+  .feature-card { padding: 48px 36px; border-radius: 20px; background: var(--pearl); border: 1px solid rgba(93,173,226,0.15); transition: all 0.4s ease; position: relative; overflow: hidden; }
+  .feature-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--sky), var(--foam)); transform: scaleX(0); transform-origin: left; transition: transform 0.4s ease; }
+  .feature-card:hover { transform: translateY(-8px); box-shadow: 0 20px 60px rgba(10,42,74,0.1); }
+  .feature-card:hover::before { transform: scaleX(1); }
+  .feature-icon { font-size: 2.8rem; margin-bottom: 24px; display: block; }
+  .feature-card h3 { font-family: 'Playfair Display', serif; font-size: 1.3rem; color: var(--deep); margin-bottom: 14px; }
+  .feature-card p { color: var(--mid); font-size: 0.9rem; line-height: 1.7; font-weight: 300; }
+  .feature-tag { display: inline-block; margin-top: 18px; font-size: 0.72rem; font-weight: 500; color: var(--sky); background: rgba(93,173,226,0.12); padding: 4px 14px; border-radius: 20px; letter-spacing: 0.05em; border: 1px solid rgba(93,173,226,0.2); }
+
+  /* ── DEEP DIVE ── */
+  #deep-dive { padding: 120px 60px; background: linear-gradient(180deg, var(--pearl) 0%, #d6eaf8 100%); }
+  .deep-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
+  .deep-visual { background: linear-gradient(145deg, var(--deep), var(--mid)); border-radius: 24px; aspect-ratio: 4/3; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; box-shadow: 0 24px 60px rgba(10,42,74,0.25); }
+  .deep-visual::before { content: ''; position: absolute; width: 300px; height: 300px; border-radius: 50%; background: radial-gradient(circle, rgba(93,173,226,0.3), transparent); top: -60px; right: -60px; }
+  .deep-visual::after { content: ''; position: absolute; width: 200px; height: 200px; border-radius: 50%; background: radial-gradient(circle, rgba(174,214,241,0.15), transparent); bottom: -40px; left: -40px; }
+  .deep-visual-inner { text-align: center; position: relative; z-index: 1; }
+  .deep-visual-inner span { font-size: 80px; display: block; margin-bottom: 16px; }
+  .deep-visual-badge { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; padding: 14px 24px; color: white; font-size: 0.85rem; backdrop-filter: blur(8px); }
+  .deep-visual-badge strong { display: block; font-family: 'Playfair Display', serif; font-size: 1.6rem; color: var(--foam); line-height: 1.1; margin-bottom: 4px; }
+  .deep-content .section-label { justify-content: flex-start; }
+  .deep-content .section-title { margin-bottom: 16px; }
+  .deep-content .section-sub { font-size: 1rem; color: var(--mid); font-weight: 300; line-height: 1.7; margin-bottom: 32px; }
+  .feature-list { list-style: none; display: flex; flex-direction: column; gap: 16px; }
+  .feature-list li { display: flex; align-items: flex-start; gap: 14px; font-size: 0.9rem; color: var(--mid); line-height: 1.6; }
+  .check { width: 22px; height: 22px; border-radius: 50%; background: linear-gradient(135deg, var(--sky), var(--teal)); display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+  .check::after { content: '✓'; color: white; font-size: 11px; font-weight: 700; }
+
+  /* ── COMPARISON ── */
+  #comparison { padding: 120px 60px; background: white; }
+  #comparison .features-header { margin-bottom: 60px; }
+  .comp-table { max-width: 900px; margin: 0 auto; border-radius: 20px; overflow: hidden; border: 1px solid rgba(93,173,226,0.15); box-shadow: 0 4px 30px rgba(93,173,226,0.08); }
+  .comp-header { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; background: var(--deep); color: white; }
+  .comp-header div { padding: 20px 24px; font-size: 0.82rem; font-weight: 600; text-align: center; }
+  .comp-header div:first-child { text-align: left; color: rgba(255,255,255,0.6); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; }
+  .comp-row { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; border-bottom: 1px solid rgba(93,173,226,0.1); }
+  .comp-row:last-child { border-bottom: none; }
+  .comp-row:nth-child(odd) { background: var(--pearl); }
+  .comp-row div { padding: 16px 24px; font-size: 0.88rem; color: var(--mid); display: flex; align-items: center; justify-content: center; }
+  .comp-row div:first-child { justify-content: flex-start; color: var(--deep); font-weight: 500; }
+  .yes { color: var(--teal) !important; font-size: 1.1rem; }
+  .no { color: #ccc !important; font-size: 1.1rem; }
+  .highlight-col { background: rgba(93,173,226,0.06) !important; }
+  .comp-badge { background: var(--sky); color: white; font-size: 0.65rem; font-weight: 600; padding: 2px 8px; border-radius: 10px; margin-left: 6px; }
+
+  /* ── TECH SPECS ── */
+  #tech-specs { padding: 120px 60px; background: linear-gradient(135deg, var(--deep) 0%, var(--mid) 100%); color: white; overflow: hidden; }
+  #tech-specs .section-label { color: var(--foam); }
+  #tech-specs .section-label::before { background: var(--foam); }
+  #tech-specs .section-title { color: white; margin-bottom: 14px; }
+  #tech-specs .section-sub { font-size: 1rem; color: rgba(255,255,255,0.6); font-weight: 300; line-height: 1.7; max-width: 480px; margin-bottom: 60px; }
+  .specs-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+  .spec-card { border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 36px 24px; text-align: center; background: rgba(255,255,255,0.05); backdrop-filter: blur(8px); transition: border-color 0.3s, background 0.3s, transform 0.3s; }
+  .spec-card:hover { border-color: rgba(93,173,226,0.4); background: rgba(93,173,226,0.08); transform: translateY(-6px); }
+  .spec-icon { font-size: 2rem; margin-bottom: 16px; display: block; }
+  .spec-num { font-family: 'Playfair Display', serif; font-size: 2.6rem; font-weight: 700; color: var(--foam); display: block; line-height: 1; margin-bottom: 6px; }
+  .spec-unit { font-size: 0.8rem; color: rgba(255,255,255,0.4); }
+  .spec-label { font-size: 0.82rem; color: rgba(255,255,255,0.7); margin-top: 10px; display: block; font-weight: 500; }
+
+  /* ── CTA ── */
+  #cta { padding: 100px 60px; background: linear-gradient(135deg, #aed6f1, #5dade2 50%, #1a5276); text-align: center; position: relative; overflow: hidden; }
+  #cta .section-label { justify-content: center; color: rgba(255,255,255,0.7); }
+  #cta .section-label::before { background: rgba(255,255,255,0.7); }
+  #cta .section-title { color: white; margin-bottom: 16px; }
+  #cta .section-sub { font-size: 1rem; color: rgba(255,255,255,0.8); font-weight: 300; line-height: 1.7; max-width: 480px; margin: 0 auto 44px; }
+  .cta-group { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+  .btn-primary { background: white; color: var(--mid); padding: 16px 36px; border-radius: 50px; text-decoration: none; font-weight: 500; font-size: 0.95rem; letter-spacing: 0.04em; transition: all 0.3s ease; box-shadow: 0 8px 30px rgba(10,42,74,0.2); display: inline-flex; align-items: center; gap: 8px; }
+  .btn-primary:hover { background: var(--pearl); transform: translateY(-3px); box-shadow: 0 14px 40px rgba(10,42,74,0.3); }
+  .btn-outline-white { border: 1.5px solid rgba(255,255,255,0.6); color: white; padding: 15px 32px; border-radius: 50px; text-decoration: none; font-weight: 500; font-size: 0.95rem; letter-spacing: 0.04em; transition: all 0.3s ease; background: transparent; display: inline-flex; align-items: center; gap: 8px; }
+  .btn-outline-white:hover { background: rgba(255,255,255,0.15); border-color: white; transform: translateY(-3px); }
+
+  /* ════════════════════════════════════════
+     FOOTER — FULLY RESPONSIVE
+  ════════════════════════════════════════ */
+  footer {
+    background: var(--deep);
+    color: rgba(255,255,255,0.7);
+    padding: 80px 60px 0;
+  }
+  .footer-top {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 60px;
+    padding-bottom: 60px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .footer-brand .logo { color: var(--foam); margin-bottom: 16px; display: inline-flex; }
+  .footer-brand p { font-size: 0.88rem; line-height: 1.7; max-width: 260px; font-weight: 300; }
+  .footer-col h5 { color: white; font-size: 0.82rem; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 20px; font-weight: 500; }
+  .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  .footer-col ul li a { color: rgba(255,255,255,0.55); text-decoration: none; font-size: 0.88rem; transition: color 0.3s; }
+  .footer-col ul li a:hover { color: var(--sky); }
+  .footer-bottom {
+    padding: 28px 0 36px;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 16px; font-size: 0.82rem;
+  }
+  .footer-bottom p { color: rgba(255,255,255,0.45); }
+  .social-links { display: flex; gap: 12px; }
+  .social-links a { width: 38px; height: 38px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; font-size: 1rem; text-decoration: none; color: white; transition: all 0.3s; }
+  .social-links a:hover { background: var(--sky); border-color: var(--sky); }
+
+  /* ── POPUP ── */
+  .popup-overlay { position: fixed; inset: 0; z-index: 10000; background: rgba(10,42,74,0.65); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.35s ease; padding: 20px; }
+  .popup-overlay.active { opacity: 1; pointer-events: all; }
+  .popup-box { background: white; border-radius: 28px; max-width: 560px; width: 100%; padding: 52px 48px; position: relative; box-shadow: 0 40px 100px rgba(10,42,74,0.3); transform: translateY(30px) scale(0.96); transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1); overflow: hidden; }
+  .popup-overlay.active .popup-box { transform: translateY(0) scale(1); }
+  .popup-box::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 5px; background: linear-gradient(90deg, var(--sky), var(--coral), var(--sky)); }
+  .popup-box::after { content: '🐠'; position: absolute; top: 18px; right: 64px; font-size: 2.2rem; opacity: 0.15; pointer-events: none; }
+  .popup-close { position: absolute; top: 18px; right: 20px; width: 36px; height: 36px; border-radius: 50%; border: 1.5px solid rgba(93,173,226,0.25); background: var(--pearl); display: flex; align-items: center; justify-content: center; cursor: none; font-size: 1rem; color: var(--mid); transition: all 0.2s; line-height: 1; }
+  .popup-close:hover { background: var(--sky); color: white; border-color: var(--sky); }
+  .popup-eyebrow { font-size: 0.72rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--sky); font-weight: 500; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+  .popup-eyebrow::before { content: ''; width: 22px; height: 1.5px; background: var(--sky); }
+  .popup-box h2 { font-family: 'Playfair Display', serif; font-size: 1.9rem; color: var(--deep); line-height: 1.2; margin-bottom: 8px; }
+  .popup-box > p { font-size: 0.88rem; color: var(--mid); font-weight: 300; line-height: 1.6; margin-bottom: 32px; }
+  .consult-form { display: flex; flex-direction: column; gap: 16px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group label { font-size: 0.78rem; font-weight: 500; color: var(--mid); letter-spacing: 0.04em; text-transform: uppercase; }
+  .form-group input, .form-group select, .form-group textarea { padding: 13px 16px; border: 1.5px solid rgba(93,173,226,0.25); border-radius: 12px; font-family: 'DM Sans', sans-serif; font-size: 0.9rem; color: var(--deep); background: var(--pearl); outline: none; transition: border-color 0.25s, box-shadow 0.25s; cursor: text; }
+  .form-group select { cursor: none; }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--sky); box-shadow: 0 0 0 3px rgba(93,173,226,0.12); background: white; }
+  .form-group textarea { resize: vertical; min-height: 88px; line-height: 1.5; }
+  .form-group input::placeholder, .form-group textarea::placeholder { color: rgba(26,82,118,0.35); }
+  .submit-btn { margin-top: 6px; padding: 16px 32px; border-radius: 50px; background: var(--mid); color: white; border: none; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 500; letter-spacing: 0.04em; cursor: none; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 8px 28px rgba(26,82,118,0.28); }
+  .submit-btn:hover { background: var(--sky); transform: translateY(-2px); box-shadow: 0 14px 36px rgba(93,173,226,0.35); }
+  .submit-btn span { font-size: 1.1rem; }
+  .popup-success { display: none; flex-direction: column; align-items: center; text-align: center; gap: 14px; padding: 20px 0 10px; }
+  .popup-success.show { display: flex; }
+  .success-icon { font-size: 3.5rem; animation: popIn 0.5s cubic-bezier(0.34,1.56,0.64,1); }
+  @keyframes popIn { from { transform: scale(0); } to { transform: scale(1); } }
+  .popup-success h3 { font-family: 'Playfair Display', serif; font-size: 1.5rem; color: var(--deep); }
+  .popup-success p { font-size: 0.9rem; color: var(--mid); font-weight: 300; max-width: 320px; line-height: 1.6; }
+
+  /* ════════════════════════════════════════
+     BREAKPOINTS
+  ════════════════════════════════════════ */
+
+  /* ≤1024px — tablets landscape */
+  @media (max-width: 1024px) {
+    .nav-inner { padding: 16px 32px; }
+    nav.scrolled .nav-inner { padding: 12px 32px; }
+    .nav-links { gap: 18px; }
+    .nav-links a { font-size: 0.82rem; }
+
+    #features, #deep-dive, #comparison, #tech-specs, #cta { padding: 80px 32px; }
+    .hero { padding: 120px 32px 80px; }
+    .features-grid-inner { grid-template-columns: repeat(2, 1fr); }
+    .specs-grid { grid-template-columns: repeat(2, 1fr); }
+
+    footer { padding: 60px 32px 0; }
+    .footer-top { grid-template-columns: 1fr 1fr; gap: 40px; }
+    .footer-brand { grid-column: 1 / -1; }
+    .footer-brand p { max-width: 100%; }
+  }
+
+  /* ≤768px — tablets portrait / large phones — hamburger kicks in */
+  @media (max-width: 768px) {
+    body { cursor: auto; }
+    .cursor, .cursor-ring { display: none; }
+
+    .nav-inner { padding: 14px 20px; }
+    nav.scrolled .nav-inner { padding: 10px 20px; }
+    .nav-links { display: none; }
+    .nav-toggle { display: flex; }
+    .nav-drawer { display: flex; }
+
+    .hero { padding: 100px 20px 60px; }
+    .hero-stats { gap: 20px; }
+
+    #features, #deep-dive, #comparison, #tech-specs, #cta { padding: 70px 20px; }
+    .features-grid-inner { grid-template-columns: 1fr; }
+    .deep-grid { grid-template-columns: 1fr; gap: 40px; }
+    .specs-grid { grid-template-columns: repeat(2, 1fr); }
+    .cta-group { flex-direction: column; align-items: center; }
+    .cta-group a { width: 100%; max-width: 300px; text-align: center; justify-content: center; }
+
+    /* Comparison table — scrollable on small screens */
+    .comp-table { overflow-x: auto; }
+    .comp-header, .comp-row { min-width: 540px; }
+
+    footer { padding: 50px 20px 0; }
+    .footer-top { grid-template-columns: 1fr 1fr; gap: 32px; padding-bottom: 40px; }
+    .footer-brand { grid-column: 1 / -1; }
+    .footer-bottom { flex-direction: column; align-items: flex-start; gap: 16px; padding: 24px 0 32px; }
+
+    .popup-box { padding: 36px 24px; }
+    .form-row { grid-template-columns: 1fr; }
+  }
+
+  /* ≤480px — small phones */
+  @media (max-width: 480px) {
+    .logo { font-size: 1.25rem; }
+    .logo span { font-size: 1.4rem; }
+    .nav-inner { padding: 12px 16px; }
+
+    .hero-stats { flex-direction: row; justify-content: space-around; gap: 12px; }
+    .stat-item h3 { font-size: 1.5rem; }
+
+    .specs-grid { grid-template-columns: 1fr 1fr; gap: 14px; }
+    .spec-num { font-size: 2rem; }
+
+    footer { padding: 40px 16px 0; }
+    .footer-top { grid-template-columns: 1fr; gap: 28px; }
+    .footer-brand { grid-column: auto; }
+    .footer-bottom { padding: 20px 0 28px; }
+    .footer-bottom p { font-size: 0.75rem; line-height: 1.5; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- POPUP -->
+<div class="popup-overlay" id="consultPopup">
+  <div class="popup-box">
+    <button class="popup-close" id="popupClose" title="Close">✕</button>
+    <div id="formContent">
+      <div class="popup-eyebrow">Free Consultation</div>
+      <h2>Book Your<br>Aquarium Consultation</h2>
+      <p>Tell us about your space and vision — our expert aquarists will reach out within 24 hours to design your perfect tank.</p>
+      <div class="consult-form" id="consultForm">
+        <div class="form-row">
+          <div class="form-group"><label>First Name</label><input type="text" placeholder="e.g. Sarah" id="fname"></div>
+          <div class="form-group"><label>Last Name</label><input type="text" placeholder="e.g. Khan" id="lname"></div>
+        </div>
+        <div class="form-group"><label>Email Address</label><input type="email" placeholder="you@example.com" id="email"></div>
+        <div class="form-group"><label>Phone Number</label><input type="tel" placeholder="+92 300 0000000" id="phone"></div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Tank Type</label>
+            <select id="tankType">
+              <option value="">Select a type…</option>
+              <option>Freshwater Tank</option>
+              <option>Marine / Reef Tank</option>
+              <option>Nano Aquarium</option>
+              <option>Custom Built-in</option>
+              <option>Office / Commercial</option>
+              <option>Not sure yet</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Preferred Date</label><input type="date" id="prefDate"></div>
+        </div>
+        <div class="form-group"><label>Tell us about your space</label><textarea placeholder="e.g. Living room wall, approx 2m wide. Looking for a reef setup with colourful fish…" id="message"></textarea></div>
+        <button class="submit-btn" id="submitBtn">Book Free Consultation <span>🐟</span></button>
+      </div>
+    </div>
+    <div class="popup-success" id="successMsg">
+      <div class="success-icon">🎉</div>
+      <h3>You're all booked in!</h3>
+      <p>Thank you! One of our expert aquarists will contact you within 24 hours to discuss your dream aquarium.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════
+     NAV — RESPONSIVE
+════════════════════ -->
+<nav id="navbar">
+  <div class="nav-inner">
+    <a href="Home.html" class="logo"><span>🐟</span> AquaWorld</a>
+
+    <!-- Desktop links -->
+    <ul class="nav-links">
+      <li><a href="Home.html">Home</a></li>
+      <li><a href="about.html">About Us</a></li>
+      <li><a href="features.html" class="active">Features</a></li>
+      <li><a href="collection.html">Collection</a></li>
+      <li><a href="aquariums.html">Aquarium</a></li>
+      <li><a href="process.html">Process</a></li>
+      <li><a href="reviews.html">Reviews</a></li>
+      <li><a href="#" class="nav-cta" id="openConsult">Contact Us</a></li>
+    </ul>
+
+    <!-- Hamburger (mobile only) -->
+    <button class="nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+
+  <!-- Mobile drawer -->
+  <div class="nav-drawer" id="navDrawer">
+    <a href="Home.html">Home</a>
+    <a href="about.html">About Us</a>
+    <a href="features.html" class="active">Features</a>
+    <a href="collection.html">Collection</a>
+    <a href="aquariums.html">Aquarium</a>
+    <a href="process.html">Process</a>
+    <a href="reviews.html">Reviews</a>
+    <a href="#" class="drawer-cta" id="openConsultMobile">Contact Us</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bubble"></div>
+  <div class="hero-bubble"></div>
+  <div class="hero-bubble"></div>
+  <div class="hero-bubble"></div>
+  <svg class="wave-divider" viewBox="0 0 1440 80" preserveAspectRatio="none" style="height:80px;">
+    <path d="M0,60 C240,20 480,80 720,50 C960,20 1200,70 1440,40 L1440,80 L0,80 Z" fill="white"/>
+  </svg>
+  <div style="position:relative;z-index:1; text-align:center;">
+    <div class="hero-eyebrow">What We Offer</div>
+    <h1 class="hero-title reveal">Technology That <em>Keeps<br>Your Ocean Thriving</em></h1>
+    <p class="hero-sub reveal">From intelligent water chemistry management to immersive lighting systems — every AquaWorld feature is engineered for aquatic excellence.</p>
+    <div class="hero-stats">
+      <div class="stat-item"><h3>6+</h3><p>Smart Features</p></div>
+      <div class="stat-item"><h3>24/7</h3><p>Monitoring</p></div>
+      <div class="stat-item"><h3>99.8%</h3><p>Uptime Rate</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES GRID -->
+<section id="features">
+  <div class="features-header reveal">
+    <div class="section-label">Core Capabilities</div>
+    <h2 class="section-title">Everything Your Aquarium Needs</h2>
+    <p class="section-sub">Six integrated systems working together to create the perfect underwater habitat for every species.</p>
+  </div>
+  <div class="features-grid-inner">
+    <div class="feature-card reveal stagger-1"><span class="feature-icon">🌊</span><h3>Crystal Clear Water</h3><p>Our advanced multi-stage filtration systems maintain pristine water clarity, keeping pH, ammonia, and nitrate levels perfectly balanced around the clock.</p><span class="feature-tag">Filtration</span></div>
+    <div class="feature-card reveal stagger-2"><span class="feature-icon">💡</span><h3>Programmable LED Lighting</h3><p>Simulate natural sunrises and sunsets with our smart LED systems. Customizable spectrum settings promote coral growth and fish health beautifully.</p><span class="feature-tag">Lighting</span></div>
+    <div class="feature-card reveal stagger-3"><span class="feature-icon">🌡️</span><h3>Smart Temperature Control</h3><p>Precision heating and cooling keeps water temperature stable within ±0.5°C — critical for tropical and cold-water species alike.</p><span class="feature-tag">Climate</span></div>
+    <div class="feature-card reveal stagger-1"><span class="feature-icon">📱</span><h3>App-Connected Monitoring</h3><p>Get temperature, pH, and filter cycle alerts from your phone in real time. Our mobile app puts full aquarium control in your pocket.</p><span class="feature-tag">Smart Home</span></div>
+    <div class="feature-card reveal stagger-2"><span class="feature-icon">🪸</span><h3>Live Coral & Plants</h3><p>Hand-selected corals and aquatic plants that thrive in your ecosystem. Our experts choose species proven to flourish together long-term.</p><span class="feature-tag">Ecosystem</span></div>
+    <div class="feature-card reveal stagger-3"><span class="feature-icon">🎓</span><h3>Expert Aquarist Support</h3><p>A dedicated team of certified marine biologists available 7 days a week for setup guidance, troubleshooting, and advanced choices.</p><span class="feature-tag">Support</span></div>
+  </div>
+</section>
+
+<!-- DEEP DIVE -->
+<section id="deep-dive">
+  <div class="deep-grid">
+    <div class="deep-visual reveal-left">
+      <div class="deep-visual-inner">
+        <span>🐠</span>
+        <div class="deep-visual-badge"><strong>±0.2°C</strong>Temperature Precision</div>
+      </div>
+    </div>
+    <div class="deep-content reveal-right">
+      <div class="section-label">Deep Dive</div>
+      <h2 class="section-title">Intelligent Water<br>Chemistry Engine</h2>
+      <p class="section-sub">Our proprietary sensor array measures 12 water parameters simultaneously, adjusting systems automatically to keep your marine life in perfect health.</p>
+      <ul class="feature-list">
+        <li><span class="check"></span>Real-time pH, ammonia, and nitrate sensors with ±0.01 accuracy</li>
+        <li><span class="check"></span>Automatic dosing pumps for calcium, alkalinity, and magnesium</li>
+        <li><span class="check"></span>UV sterilization with bacteria count reporting in your app</li>
+        <li><span class="check"></span>Water change reminders calibrated to your tank's bioload</li>
+        <li><span class="check"></span>Historical data tracking with exportable health reports</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- COMPARISON -->
+<section id="comparison">
+  <div class="features-header reveal">
+    <div class="section-label">Why Choose Us</div>
+    <h2 class="section-title">AquaWorld vs. The Rest</h2>
+    <p class="section-sub">See how our features stack up against traditional aquarium setups and other smart systems.</p>
+  </div>
+  <div class="comp-table reveal">
+    <div class="comp-header">
+      <div>Feature</div>
+      <div>AquaWorld <span class="comp-badge">Us</span></div>
+      <div>Smart Rivals</div>
+      <div>Traditional</div>
+    </div>
+    <div class="comp-row"><div>App Remote Control</div><div class="highlight-col"><span class="yes">✓</span></div><div><span class="yes">✓</span></div><div><span class="no">✗</span></div></div>
+    <div class="comp-row"><div>12-Parameter Sensing</div><div class="highlight-col"><span class="yes">✓</span></div><div><span class="no">✗</span></div><div><span class="no">✗</span></div></div>
+    <div class="comp-row"><div>Auto Dosing Pumps</div><div class="highlight-col"><span class="yes">✓</span></div><div><span class="no">✗</span></div><div><span class="no">✗</span></div></div>
+    <div class="comp-row"><div>Expert 7-Day Support</div><div class="highlight-col"><span class="yes">✓</span></div><div><span class="no">✗</span></div><div><span class="no">✗</span></div></div>
+    <div class="comp-row"><div>Live Species Warranty</div><div class="highlight-col"><span class="yes">✓</span></div><div><span class="no">✗</span></div><div><span class="no">✗</span></div></div>
+    <div class="comp-row"><div>Sunrise/Sunset LED Cycles</div><div class="highlight-col"><span class="yes">✓</span></div><div><span class="yes">✓</span></div><div><span class="no">✗</span></div></div>
+  </div>
+</section>
+
+<!-- TECH SPECS -->
+<section id="tech-specs">
+  <div class="section-label reveal">By The Numbers</div>
+  <h2 class="section-title reveal">Built for Performance</h2>
+  <p class="section-sub reveal">The engineering behind every AquaWorld system is designed to precision standards that keep marine life thriving for years.</p>
+  <div class="specs-grid">
+    <div class="spec-card reveal stagger-1"><span class="spec-icon">🌊</span><span class="spec-num">12</span><span class="spec-unit">Parameters Tracked</span><span class="spec-label">Water Chemistry Sensors</span></div>
+    <div class="spec-card reveal stagger-2"><span class="spec-icon">⏱️</span><span class="spec-num">30s</span><span class="spec-unit">Update Frequency</span><span class="spec-label">Real-Time Readings</span></div>
+    <div class="spec-card reveal stagger-3"><span class="spec-icon">💡</span><span class="spec-num">16K</span><span class="spec-unit">Color Options</span><span class="spec-label">LED Spectrum Range</span></div>
+    <div class="spec-card reveal stagger-4"><span class="spec-icon">🛡️</span><span class="spec-num">5yr</span><span class="spec-unit">Coverage Period</span><span class="spec-label">Hardware Warranty</span></div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section id="cta">
+  <div class="section-label reveal">Ready to Start?</div>
+  <h2 class="section-title reveal">Experience Every Feature<br>Risk-Free</h2>
+  <p class="section-sub reveal">Book a free 30-minute consultation and see our smart aquarium systems in action before you commit.</p>
+  <div class="cta-group reveal">
+    <a href="#" class="btn-primary" id="openConsult2">Book Free Consultation 🐟</a>
+    <a href="collection.html" class="btn-outline-white">Browse Our Tanks →</a>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════
+     FOOTER — FULLY RESPONSIVE
+════════════════════════════════════════ -->
+<footer>
+  <div class="footer-top">
+    <div class="footer-brand">
+      <a href="Home.html" class="logo"><span>🐟</span> AquaWorld</a>
+      <p>Creating stunning underwater worlds for homes, offices and public spaces since 2008. Certified, ethical, extraordinary.</p>
+    </div>
+    <div class="footer-col">
+      <h5>Aquariums</h5>
+      <ul>
+        <li><a href="collection.html">Nano Cube 30L</a></li>
+        <li><a href="collection.html">Reef Panorama 200L</a></li>
+        <li><a href="collection.html">Dutch Planted 120L</a></li>
+        <li><a href="collection.html">Blackwater Biotope 180L</a></li>
+        <li><a href="collection.html">Apex Wall Display 600L</a></li>
+        <li><a href="collection.html">Iwagumi Office Divider 350L</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h5>Services</h5>
+      <ul>
+        <li><a href="#">Tank Installation</a></li>
+        <li><a href="#">Monthly Maintenance</a></li>
+        <li><a href="#">Aquascape Design</a></li>
+        <li><a href="#">Water Testing</a></li>
+        <li><a href="#">Emergency Callout</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h5>Company</h5>
+      <ul>
+        <li><a href="about.html">About Us</a></li>
+        <li><a href="features.html">Features</a></li>
+        <li><a href="collection.html">Collection</a></li>
+        <li><a href="aquariums.html">Aquarium</a></li>
+        <li><a href="process.html">Process</a></li>
+        <li><a href="reviews.html">Reviews</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2026 AquaWorld. Designed and Developed by Maryam, Hania, Muntaha and Ayesha</p>
+    
+  </div>
+</footer>
+
+<script>
+// ── CURSOR ──
+const cursor = document.getElementById('cursor');
+const ring = document.getElementById('cursorRing');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove', e => {
+  mx = e.clientX; my = e.clientY;
+  cursor.style.left = mx+'px'; cursor.style.top = my+'px';
+});
+function animateRing() {
+  rx += (mx - rx) * 0.12; ry += (my - ry) * 0.12;
+  ring.style.left = rx+'px'; ring.style.top = ry+'px';
+  requestAnimationFrame(animateRing);
+}
+animateRing();
+
+// ── SCROLL PROGRESS ──
+const pbar = document.getElementById('progressBar');
+window.addEventListener('scroll', () => {
+  const h = document.documentElement;
+  pbar.style.width = (window.scrollY / (h.scrollHeight - h.clientHeight)) * 100 + '%';
+});
+
+// ── NAV SCROLL ──
+const navbar = document.getElementById('navbar');
+window.addEventListener('scroll', () => { navbar.classList.toggle('scrolled', window.scrollY > 60); });
+
+// ── HAMBURGER ──
+const navToggle = document.getElementById('navToggle');
+const navDrawer = document.getElementById('navDrawer');
+
+navToggle.addEventListener('click', () => {
+  const isOpen = navDrawer.classList.toggle('open');
+  navToggle.classList.toggle('open', isOpen);
+  navToggle.setAttribute('aria-expanded', isOpen);
+});
+navDrawer.querySelectorAll('a').forEach(link => {
+  link.addEventListener('click', () => {
+    navDrawer.classList.remove('open');
+    navToggle.classList.remove('open');
+    navToggle.setAttribute('aria-expanded', false);
+  });
+});
+document.addEventListener('click', e => {
+  if (!navbar.contains(e.target)) {
+    navDrawer.classList.remove('open');
+    navToggle.classList.remove('open');
+    navToggle.setAttribute('aria-expanded', false);
+  }
+});
+
+// ── SCROLL REVEAL ──
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.12 });
+document.querySelectorAll('.reveal,.reveal-left,.reveal-right').forEach(el => observer.observe(el));
+
+// ── POPUP ──
+const popup = document.getElementById('consultPopup');
+const popupClose = document.getElementById('popupClose');
+const openConsult = document.getElementById('openConsult');
+const openConsult2 = document.getElementById('openConsult2');
+const openConsultMobile = document.getElementById('openConsultMobile');
+const submitBtn = document.getElementById('submitBtn');
+const formContent = document.getElementById('formContent');
+const successMsg = document.getElementById('successMsg');
+
+function openPopup(e) {
+  if (e) e.preventDefault();
+  popup.classList.add('active');
+  document.body.style.overflow = 'hidden';
+  formContent.style.display = '';
+  successMsg.classList.remove('show');
+  navDrawer.classList.remove('open');
+  navToggle.classList.remove('open');
+}
+function closePopup() {
+  popup.classList.remove('active');
+  document.body.style.overflow = '';
+}
+[openConsult, openConsult2, openConsultMobile].forEach(el => el.addEventListener('click', openPopup));
+popupClose.addEventListener('click', closePopup);
+popup.addEventListener('click', e => { if (e.target === popup) closePopup(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closePopup(); });
+submitBtn.addEventListener('click', () => {
+  const fname = document.getElementById('fname').value.trim();
+  const email = document.getElementById('email').value.trim();
+  if (!fname) { document.getElementById('fname').focus(); return; }
+  if (!email || !email.includes('@')) { document.getElementById('email').focus(); return; }
+  formContent.style.display = 'none';
+  successMsg.classList.add('show');
+  setTimeout(() => closePopup(), 3500);
+});
+</script>
+</body>
+</html>

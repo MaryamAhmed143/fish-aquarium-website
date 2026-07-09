@@ -1,0 +1,1262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AquaWorld — Premium Fish Aquariums</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --deep: #0a2a4a;
+    --mid: #1a5276;
+    --sky: #5dade2;
+    --foam: #aed6f1;
+    --pearl: #e8f4fd;
+    --white: #ffffff;
+    --coral: #f0a07a;
+    --gold: #f7c948;
+    --mint: #a8e6cf;
+    --glow: rgba(93,173,226,0.4);
+  }
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--pearl);
+    color: var(--deep);
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* ── CURSOR ── */
+  .cursor {
+    width: 12px; height: 12px;
+    background: var(--sky); border-radius: 50%;
+    position: fixed; pointer-events: none; z-index: 9999;
+    transition: transform 0.15s ease, background 0.2s;
+    transform: translate(-50%, -50%);
+  }
+  .cursor-ring {
+    width: 36px; height: 36px;
+    border: 1.5px solid var(--sky); border-radius: 50%;
+    position: fixed; pointer-events: none; z-index: 9998;
+    transition: transform 0.4s ease, width 0.3s, height 0.3s, border-color 0.3s;
+    transform: translate(-50%, -50%); opacity: 0.6;
+  }
+  body:has(a:hover) .cursor-ring,
+  body:has(button:hover) .cursor-ring { width: 56px; height: 56px; border-color: var(--coral); }
+
+  /* ── BUBBLES ── */
+  .bubbles-bg { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+  .bubble {
+    position: absolute; bottom: -60px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, rgba(255,255,255,0.8), rgba(93,173,226,0.2));
+    border: 1px solid rgba(255,255,255,0.5);
+    animation: rise linear infinite;
+  }
+  @keyframes rise {
+    0%   { transform: translateY(0) translateX(0) scale(1); opacity: 0; }
+    10%  { opacity: 0.7; }
+    90%  { opacity: 0.4; }
+    100% { transform: translateY(-110vh) translateX(var(--dx)) scale(0.6); opacity: 0; }
+  }
+
+  /* ── SECTION FISH ── */
+  #section-fish {
+    position: absolute; pointer-events: none; z-index: 5;
+    font-size: 5rem; line-height: 1;
+    filter: drop-shadow(0 6px 20px rgba(10,42,74,0.18));
+    will-change: transform; top: 50%; left: 0;
+    transform: translateY(-50%); transition: opacity 0.3s;
+  }
+
+  /* ════════════════════════════════════════
+     NAV — FULLY RESPONSIVE
+  ════════════════════════════════════════ */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    backdrop-filter: blur(16px);
+    background: rgba(232,244,253,0.92);
+    border-bottom: 1px solid rgba(93,173,226,0.2);
+    transition: box-shadow 0.3s;
+  }
+
+  /* Inner wrapper */
+  .nav-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 60px;
+    transition: padding 0.3s;
+  }
+  nav.scrolled .nav-inner { padding: 12px 60px; }
+  nav.scrolled { box-shadow: 0 4px 30px rgba(10,42,74,0.08); }
+
+  .logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem; color: var(--mid);
+    display: flex; align-items: center; gap: 10px; text-decoration: none;
+    flex-shrink: 0;
+  }
+  .logo span { font-size: 1.6rem; }
+
+  /* Desktop links */
+  .nav-links {
+    display: flex; gap: 28px; list-style: none;
+    align-items: center;
+  }
+  .nav-links a {
+    text-decoration: none; color: var(--mid);
+    font-size: 0.88rem; font-weight: 500; letter-spacing: 0.04em;
+    position: relative; padding-bottom: 10px; white-space: nowrap;
+  }
+  .nav-links a::after {
+    content: ''; position: absolute; bottom: 0; left: 0;
+    width: 0; height: 2px; background: var(--sky);
+    transition: width 0.3s ease;
+  }
+  .nav-links a:hover::after { width: 100%; }
+  .nav-cta {
+    background: var(--mid); color: white !important;
+    padding: 10px 22px 16px 22px; border-radius: 50px;
+    transition: background 0.3s, transform 0.2s !important;
+    cursor: none;
+  }
+  .nav-cta:hover { background: var(--sky) !important; transform: translateY(-2px); }
+  .nav-cta::after { display: none !important; }
+
+  /* Hamburger button */
+  .nav-toggle {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 8px;
+    transition: background 0.2s;
+    cursor: none;
+  }
+  .nav-toggle:hover { background: rgba(93,173,226,0.12); }
+  .nav-toggle span {
+    display: block;
+    width: 24px; height: 2px;
+    background: var(--mid);
+    border-radius: 2px;
+    transition: transform 0.3s ease, opacity 0.3s ease, width 0.3s ease;
+    transform-origin: center;
+  }
+  /* Animated X state */
+  .nav-toggle.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .nav-toggle.open span:nth-child(2) { opacity: 0; width: 0; }
+  .nav-toggle.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+  /* Mobile drawer */
+  .nav-drawer {
+    display: none;
+    flex-direction: column;
+    background: rgba(232,244,253,0.98);
+    border-top: 1px solid rgba(93,173,226,0.15);
+    padding: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease, padding 0.3s ease;
+  }
+  .nav-drawer.open {
+    max-height: 500px;
+    padding: 16px 0 20px;
+  }
+  .nav-drawer a {
+    display: block;
+    text-decoration: none;
+    color: var(--mid);
+    font-size: 0.95rem;
+    font-weight: 500;
+    padding: 12px 24px;
+    border-bottom: 1px solid rgba(93,173,226,0.08);
+    transition: background 0.2s, color 0.2s;
+  }
+  .nav-drawer a:last-child { border-bottom: none; }
+  .nav-drawer a:hover { background: rgba(93,173,226,0.08); color: var(--sky); }
+  .nav-drawer .drawer-cta {
+    margin: 12px 24px 0;
+    display: block;
+    background: var(--mid); color: white !important;
+    text-align: center;
+    padding: 12px 24px;
+    border-radius: 50px;
+    border-bottom: none;
+    transition: background 0.3s;
+  }
+  .nav-drawer .drawer-cta:hover { background: var(--sky) !important; }
+
+  /* ── HERO ── */
+  #hero {
+    min-height: 100vh;
+    background: linear-gradient(160deg, #e8f4fd 0%, #aed6f1 40%, #5dade2 100%);
+    display: flex; align-items: center; justify-content: center;
+    position: relative; overflow: hidden;
+    padding: 140px 60px 100px;
+  }
+  .hero-scene {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 70% 50% at 70% 60%, rgba(93,173,226,0.35) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 30% at 20% 30%, rgba(255,255,255,0.5) 0%, transparent 60%);
+  }
+  .hero-content {
+    position: relative; z-index: 2;
+    max-width: 760px; width: 100%;
+    margin: 0 auto; text-align: center;
+  }
+  .hero-eyebrow {
+    font-size: 0.8rem; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--mid); font-weight: 500; margin-bottom: 20px;
+    display: flex; align-items: center; justify-content: center; gap: 12px;
+  }
+  .hero-eyebrow::before { content: ''; width: 40px; height: 1.5px; background: var(--sky); }
+  .hero-eyebrow::after  { content: ''; width: 40px; height: 1.5px; background: var(--sky); }
+  .hero-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(3.2rem, 6vw, 5.5rem);
+    line-height: 1.1; color: var(--deep); margin-bottom: 24px;
+  }
+  .hero-title em { color: var(--sky); font-style: italic; }
+  .hero-sub {
+    font-size: 1.05rem; line-height: 1.7; color: var(--mid);
+    max-width: 500px; margin: 0 auto 44px; font-weight: 300;
+  }
+  .hero-btns { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+  .btn-primary {
+    background: var(--mid); color: white; padding: 16px 36px;
+    border-radius: 50px; text-decoration: none; font-weight: 500;
+    font-size: 0.95rem; letter-spacing: 0.04em;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 30px rgba(26,82,118,0.3);
+  }
+  .btn-primary:hover {
+    background: var(--sky); transform: translateY(-3px);
+    box-shadow: 0 14px 40px rgba(93,173,226,0.4);
+  }
+  .btn-outline {
+    border: 1.5px solid var(--mid); color: var(--mid);
+    padding: 15px 32px; border-radius: 50px; text-decoration: none;
+    font-weight: 500; font-size: 0.95rem; letter-spacing: 0.04em;
+    transition: all 0.3s ease; background: transparent;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .btn-outline:hover {
+    background: rgba(93,173,226,0.1); border-color: var(--sky);
+    color: var(--sky); transform: translateY(-3px);
+  }
+  .hero-stats {
+    display: flex; gap: 40px; margin-top: 60px; justify-content: center;
+  }
+  .stat-item h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem; color: var(--mid); line-height: 1;
+  }
+  .stat-item p { font-size: 0.8rem; color: var(--mid); opacity: 0.7; margin-top: 4px; letter-spacing: 0.05em; text-transform: uppercase; }
+  .wave-divider { position: absolute; bottom: 0; left: 0; right: 0; }
+
+  /* ── SECTION COMMONS ── */
+  section { position: relative; z-index: 2; }
+  .section-label {
+    font-size: 0.75rem; letter-spacing: 0.25em; text-transform: uppercase;
+    color: var(--sky); font-weight: 500; margin-bottom: 12px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .section-label::before { content: ''; width: 28px; height: 1.5px; background: var(--sky); }
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 3.5vw, 3rem); color: var(--deep); line-height: 1.2;
+  }
+
+  /* ── FEATURES ── */
+  #features { padding: 120px 60px; background: white; }
+  .features-header { text-align: center; margin-bottom: 80px; }
+  .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; }
+  .feature-card {
+    padding: 48px 36px; border-radius: 20px;
+    background: var(--pearl);
+    border: 1px solid rgba(93,173,226,0.15);
+    transition: all 0.4s ease;
+    position: relative; overflow: hidden;
+  }
+  .feature-card::before {
+    content: ''; position: absolute;
+    top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, var(--sky), var(--foam));
+    transform: scaleX(0); transform-origin: left;
+    transition: transform 0.4s ease;
+  }
+  .feature-card:hover { transform: translateY(-8px); box-shadow: 0 20px 60px rgba(10,42,74,0.1); }
+  .feature-card:hover::before { transform: scaleX(1); }
+  .feature-icon { font-size: 2.8rem; margin-bottom: 24px; display: block; }
+  .feature-card h3 { font-family: 'Playfair Display', serif; font-size: 1.3rem; color: var(--deep); margin-bottom: 14px; }
+  .feature-card p { color: var(--mid); font-size: 0.9rem; line-height: 1.7; font-weight: 300; }
+
+  /* ── COLLECTION ── */
+  #collection {
+    padding: 120px 60px;
+    background: linear-gradient(180deg, var(--pearl) 0%, #d6eaf8 100%);
+  }
+  .collection-header {
+    display: flex; align-items: flex-end;
+    justify-content: space-between; margin-bottom: 60px;
+  }
+  .tank-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; }
+  .tank-card {
+    border-radius: 24px; overflow: hidden;
+    background: white;
+    box-shadow: 0 4px 28px rgba(10,42,74,0.08);
+    transition: all 0.4s ease; cursor: pointer;
+    position: relative;
+  }
+  .tank-card:hover { transform: translateY(-10px); box-shadow: 0 24px 60px rgba(10,42,74,0.16); }
+  .tank-visual { height: 240px; position: relative; overflow: hidden; }
+  .tank-water::before {
+    content: '';
+    position: absolute; top: 0; left: -100%;
+    width: 300%; height: 20px;
+    background: rgba(93,173,226,0.3);
+    border-radius: 50%;
+    animation: waterWave 3s ease-in-out infinite;
+  }
+  @keyframes waterWave {
+    0%,100% { transform: translateX(0) scaleY(1); }
+    50% { transform: translateX(8%) scaleY(1.3); }
+  }
+  .tank-scene { width: 100%; height: 100%; display: flex; align-items: flex-end; justify-content: center; position: relative; padding-bottom: 10px; }
+  .tank-scene svg { width: 100%; height: 100%; position: absolute; inset: 0; }
+  .fish-swim-1 { position: absolute; font-size: 1.4rem; animation: swimAcross1 6s ease-in-out infinite; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15)); z-index: 3; }
+  .fish-swim-2 { position: absolute; font-size: 1rem; animation: swimAcross2 8s ease-in-out infinite; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1)); z-index: 3; }
+  @keyframes swimAcross1 {
+    0%,100% { left: 15%; top: 45%; transform: scaleX(1); }
+    40% { left: 65%; top: 35%; transform: scaleX(1); }
+    41% { transform: scaleX(-1); }
+    80% { left: 20%; top: 50%; transform: scaleX(-1); }
+    81% { transform: scaleX(1); }
+  }
+  @keyframes swimAcross2 {
+    0%,100% { left: 55%; top: 55%; transform: scaleX(-1); }
+    50% { left: 10%; top: 40%; transform: scaleX(-1); }
+    51% { transform: scaleX(1); }
+    90% { left: 60%; top: 48%; transform: scaleX(1); }
+    91% { transform: scaleX(-1); }
+  }
+  .bubble-small { position: absolute; width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.7); border: 1px solid rgba(93,173,226,0.4); animation: bubbleUp 3s ease-in infinite; z-index: 3; }
+  @keyframes bubbleUp { 0% { transform: translateY(0); opacity: 0.8; } 100% { transform: translateY(-80px); opacity: 0; } }
+  .tank-frame { position: absolute; inset: 0; border: 3px solid rgba(93,173,226,0.25); border-radius: 4px 4px 0 0; pointer-events: none; z-index: 4; }
+  .tank-frame::before { content: ''; position: absolute; top: -6px; left: -6px; right: -6px; height: 10px; background: linear-gradient(90deg, rgba(10,42,74,0.6), rgba(26,82,118,0.8), rgba(10,42,74,0.6)); border-radius: 4px 4px 0 0; }
+  .tank-card-body { padding: 22px 26px 26px; }
+  .tank-card-body h4 { font-family: 'Playfair Display', serif; font-size: 1.2rem; color: var(--deep); margin-bottom: 8px; }
+  .tank-card-body p { font-size: 0.85rem; color: var(--mid); font-weight: 300; line-height: 1.65; margin-bottom: 16px; }
+  .tank-specs { display: flex; gap: 10px; flex-wrap: wrap; }
+  .tank-spec-tag { background: var(--pearl); color: var(--mid); padding: 4px 12px; border-radius: 20px; font-size: 0.72rem; font-weight: 500; letter-spacing: 0.05em; border: 1px solid rgba(93,173,226,0.2); }
+  .tank-tag { position: absolute; top: 14px; right: 14px; padding: 5px 14px; border-radius: 20px; font-size: 0.7rem; font-weight: 500; color: white; letter-spacing: 0.06em; text-transform: uppercase; z-index: 5; }
+
+  /* ── SHOWCASE ── */
+  #showcase { padding: 120px 60px; background: linear-gradient(135deg, var(--deep) 0%, var(--mid) 100%); color: white; overflow: hidden; }
+  #showcase .section-label { color: var(--foam); }
+  #showcase .section-label::before { background: var(--foam); }
+  #showcase .section-title { color: white; }
+  .showcase-inner { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; margin-top: 60px; }
+  .showcase-3d { perspective: 800px; height: 420px; display: flex; align-items: center; justify-content: center; }
+  .cube-tank { width: 280px; height: 280px; transform-style: preserve-3d; animation: rotateCube 12s linear infinite; position: relative; }
+  @keyframes rotateCube { from { transform: rotateY(0deg) rotateX(15deg); } to { transform: rotateY(360deg) rotateX(15deg); } }
+  .face { position: absolute; width: 280px; height: 280px; border: 2px solid rgba(93,173,226,0.5); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 3rem; backface-visibility: visible; }
+  .face.front  { background: rgba(93,173,226,0.15); transform: translateZ(140px); }
+  .face.back   { background: rgba(93,173,226,0.1); transform: rotateY(180deg) translateZ(140px); }
+  .face.left   { background: rgba(26,82,118,0.2); transform: rotateY(-90deg) translateZ(140px); }
+  .face.right  { background: rgba(26,82,118,0.2); transform: rotateY(90deg) translateZ(140px); }
+  .face.top    { background: rgba(174,214,241,0.15); transform: rotateX(90deg) translateZ(140px); }
+  .face.bottom { background: rgba(10,42,74,0.3); transform: rotateX(-90deg) translateZ(140px); }
+  .glow-ring { position: absolute; border-radius: 50%; border: 1px solid rgba(93,173,226,0.2); animation: ringPulse 4s ease-in-out infinite; }
+  .glow-ring:nth-child(1) { width: 360px; height: 360px; top: 50%; left: 50%; transform: translate(-50%,-50%); animation-delay: 0s; }
+  .glow-ring:nth-child(2) { width: 440px; height: 440px; top: 50%; left: 50%; transform: translate(-50%,-50%); animation-delay: -1.3s; }
+  .glow-ring:nth-child(3) { width: 520px; height: 520px; top: 50%; left: 50%; transform: translate(-50%,-50%); animation-delay: -2.6s; }
+  @keyframes ringPulse { 0%,100% { opacity: 0.15; transform: translate(-50%,-50%) scale(0.95); } 50% { opacity: 0.5; transform: translate(-50%,-50%) scale(1.05); } }
+  .showcase-text h3 { font-family: 'Playfair Display', serif; font-size: 2rem; margin-bottom: 20px; color: white; }
+  .showcase-text p { font-size: 0.95rem; line-height: 1.8; color: rgba(255,255,255,0.7); font-weight: 300; margin-bottom: 32px; }
+  .spec-list { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+  .spec-list li { display: flex; align-items: center; gap: 14px; font-size: 0.9rem; color: rgba(255,255,255,0.8); }
+  .spec-list li::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--sky); flex-shrink: 0; }
+
+  /* ── PROCESS ── */
+  #process { padding: 120px 60px; background: white; }
+  .process-header { text-align: center; margin-bottom: 80px; }
+  .process-steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; position: relative; }
+  .process-steps::before { content: ''; position: absolute; top: 36px; left: calc(12.5% + 20px); right: calc(12.5% + 20px); height: 1px; background: linear-gradient(90deg, var(--foam), var(--sky), var(--foam)); z-index: 0; }
+  .step { text-align: center; padding: 0 24px; position: relative; z-index: 1; }
+  .step-num { width: 72px; height: 72px; border-radius: 50%; background: var(--pearl); border: 2px solid var(--foam); display: flex; align-items: center; justify-content: center; font-family: 'Playfair Display', serif; font-size: 1.4rem; color: var(--mid); margin: 0 auto 24px; position: relative; transition: all 0.4s ease; }
+  .step:hover .step-num { background: var(--sky); color: white; border-color: var(--sky); box-shadow: 0 0 30px rgba(93,173,226,0.4); transform: scale(1.1); }
+  .step-icon { font-size: 1.6rem; display: block; margin-bottom: 6px; }
+  .step h4 { font-family: 'Playfair Display', serif; font-size: 1.1rem; color: var(--deep); margin-bottom: 10px; }
+  .step p { font-size: 0.85rem; color: var(--mid); line-height: 1.6; font-weight: 300; }
+
+  /* ── TESTIMONIALS ── */
+  #testimonials { padding: 120px 60px; background: linear-gradient(180deg, #d6eaf8 0%, var(--pearl) 100%); }
+  .testimonials-header { text-align: center; margin-bottom: 70px; }
+  .testimonials-track-outer { overflow: hidden; }
+  .testimonials-track { display: flex; gap: 28px; animation: scrollTestimonials 30s linear infinite; width: max-content; }
+  .testimonials-track:hover { animation-play-state: paused; }
+  @keyframes scrollTestimonials { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+  .tcard { width: 320px; padding: 32px; border-radius: 20px; background: white; flex-shrink: 0; box-shadow: 0 4px 20px rgba(10,42,74,0.06); border: 1px solid rgba(93,173,226,0.1); transition: transform 0.3s; }
+  .tcard:hover { transform: translateY(-6px); }
+  .tcard-stars { color: var(--gold); font-size: 0.9rem; margin-bottom: 16px; letter-spacing: 2px; }
+  .tcard p { font-size: 0.9rem; line-height: 1.7; color: var(--mid); font-style: italic; margin-bottom: 24px; font-weight: 300; }
+  .tcard-author { display: flex; align-items: center; gap: 12px; }
+  .tcard-avatar { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; background: var(--pearl); }
+  .tcard-author div h5 { font-size: 0.9rem; color: var(--deep); font-weight: 500; }
+  .tcard-author div p { font-size: 0.78rem; color: var(--sky); margin: 0; font-style: normal; }
+
+  /* ── NEWSLETTER ── */
+  #newsletter { padding: 100px 60px; background: linear-gradient(135deg, #aed6f1, #5dade2 50%, #1a5276); text-align: center; position: relative; overflow: hidden; }
+  #newsletter .section-title { color: white; margin-bottom: 16px; }
+  #newsletter p { color: rgba(255,255,255,0.8); font-size: 1rem; margin-bottom: 44px; font-weight: 300; }
+  .nl-form { display: flex; max-width: 480px; margin: 0 auto; gap: 12px; position: relative; z-index: 1; }
+  .nl-form input { flex: 1; padding: 16px 24px; border-radius: 50px; border: 1.5px solid rgba(255,255,255,0.4); background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); color: white; font-family: 'DM Sans', sans-serif; font-size: 0.9rem; outline: none; transition: border-color 0.3s; }
+  .nl-form input::placeholder { color: rgba(255,255,255,0.6); }
+  .nl-form input:focus { border-color: white; }
+  .nl-form button { padding: 16px 32px; border-radius: 50px; background: white; color: var(--mid); border: none; font-weight: 600; font-size: 0.9rem; cursor: none; transition: all 0.3s; font-family: 'DM Sans', sans-serif; white-space: nowrap; }
+  .nl-form button:hover { background: var(--pearl); transform: scale(1.04); }
+
+  /* ════════════════════════════════════════
+     FOOTER — FULLY RESPONSIVE
+  ════════════════════════════════════════ */
+  footer {
+    background: var(--deep);
+    color: rgba(255,255,255,0.7);
+    padding: 80px 60px 0;
+  }
+
+  .footer-top {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 60px;
+    padding-bottom: 60px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+
+  .footer-brand .logo {
+    color: var(--foam);
+    margin-bottom: 16px;
+    display: inline-flex;
+  }
+  .footer-brand p {
+    font-size: 0.88rem;
+    line-height: 1.7;
+    max-width: 260px;
+    font-weight: 300;
+  }
+
+  .footer-col h5 {
+    color: white;
+    font-size: 0.82rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    font-weight: 500;
+  }
+  .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  .footer-col ul li a {
+    color: rgba(255,255,255,0.55);
+    text-decoration: none;
+    font-size: 0.88rem;
+    transition: color 0.3s;
+  }
+  .footer-col ul li a:hover { color: var(--sky); }
+
+  /* Footer bottom bar */
+  .footer-bottom {
+    padding: 28px 0 36px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    font-size: 0.82rem;
+  }
+
+  .footer-bottom p { color: rgba(255,255,255,0.45); }
+
+  .social-links { display: flex; gap: 12px; }
+  .social-links a {
+    width: 38px; height: 38px; border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.15);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem; text-decoration: none; color: white;
+    transition: all 0.3s;
+  }
+  .social-links a:hover { background: var(--sky); border-color: var(--sky); }
+
+  /* ── SCROLL REVEAL ── */
+  .reveal { opacity: 0; transform: translateY(40px); transition: opacity 0.7s ease, transform 0.7s ease; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+  .reveal-left { opacity: 0; transform: translateX(-50px); transition: opacity 0.8s ease, transform 0.8s ease; }
+  .reveal-left.visible { opacity: 1; transform: translateX(0); }
+  .reveal-right { opacity: 0; transform: translateX(50px); transition: opacity 0.8s ease, transform 0.8s ease; }
+  .reveal-right.visible { opacity: 1; transform: translateX(0); }
+  .stagger-1 { transition-delay: 0.1s !important; }
+  .stagger-2 { transition-delay: 0.2s !important; }
+  .stagger-3 { transition-delay: 0.3s !important; }
+  .stagger-4 { transition-delay: 0.4s !important; }
+
+  .parallax-fish { position: absolute; font-size: 3rem; opacity: 0.06; pointer-events: none; user-select: none; }
+  .progress-bar { position: fixed; top: 0; left: 0; height: 3px; background: linear-gradient(90deg, var(--sky), var(--coral)); z-index: 9999; width: 0%; transition: width 0.1s; }
+
+  /* ── POPUP ── */
+  .popup-overlay { position: fixed; inset: 0; z-index: 10000; background: rgba(10,42,74,0.65); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.35s ease; padding: 20px; }
+  .popup-overlay.active { opacity: 1; pointer-events: all; }
+  .popup-box { background: white; border-radius: 28px; max-width: 560px; width: 100%; padding: 52px 48px; position: relative; box-shadow: 0 40px 100px rgba(10,42,74,0.3); transform: translateY(30px) scale(0.96); transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1); overflow: hidden; }
+  .popup-overlay.active .popup-box { transform: translateY(0) scale(1); }
+  .popup-box::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 5px; background: linear-gradient(90deg, var(--sky), var(--coral), var(--sky)); }
+  .popup-box::after { content: '🐠'; position: absolute; top: 18px; right: 64px; font-size: 2.2rem; opacity: 0.15; pointer-events: none; }
+  .popup-close { position: absolute; top: 18px; right: 20px; width: 36px; height: 36px; border-radius: 50%; border: 1.5px solid rgba(93,173,226,0.25); background: var(--pearl); display: flex; align-items: center; justify-content: center; cursor: none; font-size: 1rem; color: var(--mid); transition: all 0.2s; line-height: 1; }
+  .popup-close:hover { background: var(--sky); color: white; border-color: var(--sky); }
+  .popup-eyebrow { font-size: 0.72rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--sky); font-weight: 500; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+  .popup-eyebrow::before { content: ''; width: 22px; height: 1.5px; background: var(--sky); }
+  .popup-box h2 { font-family: 'Playfair Display', serif; font-size: 1.9rem; color: var(--deep); line-height: 1.2; margin-bottom: 8px; }
+  .popup-box > p { font-size: 0.88rem; color: var(--mid); font-weight: 300; line-height: 1.6; margin-bottom: 32px; }
+  .consult-form { display: flex; flex-direction: column; gap: 16px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group label { font-size: 0.78rem; font-weight: 500; color: var(--mid); letter-spacing: 0.04em; text-transform: uppercase; }
+  .form-group input, .form-group select, .form-group textarea { padding: 13px 16px; border: 1.5px solid rgba(93,173,226,0.25); border-radius: 12px; font-family: 'DM Sans', sans-serif; font-size: 0.9rem; color: var(--deep); background: var(--pearl); outline: none; transition: border-color 0.25s, box-shadow 0.25s; cursor: text; }
+  .form-group select { cursor: none; }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--sky); box-shadow: 0 0 0 3px rgba(93,173,226,0.12); background: white; }
+  .form-group textarea { resize: vertical; min-height: 88px; line-height: 1.5; }
+  .form-group input::placeholder, .form-group textarea::placeholder { color: rgba(26,82,118,0.35); }
+  .submit-btn { margin-top: 6px; padding: 16px 32px; border-radius: 50px; background: var(--mid); color: white; border: none; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 500; letter-spacing: 0.04em; cursor: none; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 8px 28px rgba(26,82,118,0.28); }
+  .submit-btn:hover { background: var(--sky); transform: translateY(-2px); box-shadow: 0 14px 36px rgba(93,173,226,0.35); }
+  .submit-btn span { font-size: 1.1rem; }
+  .popup-success { display: none; flex-direction: column; align-items: center; text-align: center; gap: 14px; padding: 20px 0 10px; }
+  .popup-success.show { display: flex; }
+  .success-icon { font-size: 3.5rem; animation: popIn 0.5s cubic-bezier(0.34,1.56,0.64,1); }
+  @keyframes popIn { from { transform: scale(0); } to { transform: scale(1); } }
+  .popup-success h3 { font-family: 'Playfair Display', serif; font-size: 1.5rem; color: var(--deep); }
+  .popup-success p { font-size: 0.9rem; color: var(--mid); font-weight: 300; max-width: 320px; line-height: 1.6; }
+
+  /* ════════════════════════════════════════
+     RESPONSIVE BREAKPOINTS
+  ════════════════════════════════════════ */
+
+  /* Large tablets (≤1024px) */
+  @media (max-width: 1024px) {
+    .nav-inner { padding: 16px 32px; }
+    nav.scrolled .nav-inner { padding: 12px 32px; }
+    .nav-links { gap: 18px; }
+    .nav-links a { font-size: 0.82rem; }
+
+    .footer-top { grid-template-columns: 1fr 1fr; gap: 40px; }
+    .footer-brand { grid-column: 1 / -1; }
+    .footer-brand p { max-width: 100%; }
+    footer { padding: 60px 32px 0; }
+
+    #features { padding: 80px 32px; }
+    #collection { padding: 80px 32px; }
+    #showcase { padding: 80px 32px; }
+    #process { padding: 80px 32px; }
+    #testimonials { padding: 80px 32px; }
+    #newsletter { padding: 80px 32px; }
+    #hero { padding: 120px 32px 80px; }
+  }
+
+  /* Tablets (≤768px) — hide desktop nav, show hamburger */
+  @media (max-width: 768px) {
+    body { cursor: auto; }
+    .cursor, .cursor-ring { display: none; }
+
+    .nav-inner { padding: 14px 20px; }
+    nav.scrolled .nav-inner { padding: 10px 20px; }
+
+    .nav-links { display: none; }
+    .nav-toggle { display: flex; }
+    .nav-drawer { display: flex; }
+
+    #hero { padding: 100px 20px 60px; }
+    .hero-stats { gap: 20px; flex-wrap: wrap; justify-content: center; }
+    .hero-btns { flex-direction: column; align-items: center; }
+    .hero-btns a { width: 100%; max-width: 280px; text-align: center; justify-content: center; }
+
+    #features { padding: 70px 20px; }
+    .features-grid { grid-template-columns: 1fr; }
+
+    #collection { padding: 70px 20px; }
+    .collection-header { flex-direction: column; align-items: flex-start; gap: 20px; }
+    .tank-grid { grid-template-columns: 1fr; }
+
+    #showcase { padding: 70px 20px; }
+    .showcase-inner { grid-template-columns: 1fr; gap: 40px; }
+    .showcase-3d { height: 300px; }
+    .cube-tank { width: 200px; height: 200px; }
+    .face { width: 200px; height: 200px; }
+    .face.front  { transform: translateZ(100px); }
+    .face.back   { transform: rotateY(180deg) translateZ(100px); }
+    .face.left   { transform: rotateY(-90deg) translateZ(100px); }
+    .face.right  { transform: rotateY(90deg) translateZ(100px); }
+    .face.top    { transform: rotateX(90deg) translateZ(100px); }
+    .face.bottom { transform: rotateX(-90deg) translateZ(100px); }
+
+    #process { padding: 70px 20px; }
+    .process-steps { grid-template-columns: repeat(2,1fr); gap: 40px; }
+    .process-steps::before { display: none; }
+
+    #testimonials { padding: 70px 20px; }
+    #newsletter { padding: 70px 20px; }
+    .nl-form { flex-direction: column; }
+    .nl-form input, .nl-form button { width: 100%; }
+
+    footer { padding: 50px 20px 0; }
+    .footer-top { grid-template-columns: 1fr 1fr; gap: 32px; padding-bottom: 40px; }
+    .footer-brand { grid-column: 1 / -1; }
+    .footer-bottom { flex-direction: column; align-items: flex-start; gap: 16px; padding: 24px 0 32px; }
+
+    .popup-box { padding: 36px 24px; }
+    .form-row { grid-template-columns: 1fr; }
+  }
+
+  /* Small mobile (≤480px) */
+  @media (max-width: 480px) {
+    .logo { font-size: 1.25rem; }
+    .logo span { font-size: 1.4rem; }
+    .nav-inner { padding: 12px 16px; }
+
+    .hero-stats { flex-direction: row; justify-content: space-around; width: 100%; }
+    .stat-item h3 { font-size: 1.6rem; }
+
+    footer { padding: 40px 16px 0; }
+    .footer-top { grid-template-columns: 1fr; gap: 28px; }
+    .footer-brand { grid-column: auto; }
+    .footer-bottom { padding: 20px 0 28px; }
+    .footer-bottom p { font-size: 0.75rem; line-height: 1.5; }
+
+    .process-steps { grid-template-columns: 1fr; gap: 32px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+<div class="progress-bar" id="progressBar"></div>
+<div class="bubbles-bg" id="bubblesBg"></div>
+
+<!-- POPUP -->
+<div class="popup-overlay" id="consultPopup">
+  <div class="popup-box">
+    <button class="popup-close" id="popupClose" title="Close">✕</button>
+    <div id="formContent">
+      <div class="popup-eyebrow">Free Consultation</div>
+      <h2>Book Your<br>Aquarium Consultation</h2>
+      <p>Tell us about your space and vision — our expert aquarists will reach out within 24 hours to design your perfect tank.</p>
+      <div class="consult-form" id="consultForm">
+        <div class="form-row">
+          <div class="form-group"><label>First Name</label><input type="text" placeholder="e.g. Sarah" id="fname"></div>
+          <div class="form-group"><label>Last Name</label><input type="text" placeholder="e.g. Khan" id="lname"></div>
+        </div>
+        <div class="form-group"><label>Email Address</label><input type="email" placeholder="you@example.com" id="email"></div>
+        <div class="form-group"><label>Phone Number</label><input type="tel" placeholder="+92 300 0000000" id="phone"></div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Tank Type</label>
+            <select id="tankType">
+              <option value="">Select a type…</option>
+              <option>Freshwater Tank</option>
+              <option>Marine / Reef Tank</option>
+              <option>Nano Aquarium</option>
+              <option>Custom Built-in</option>
+              <option>Office / Commercial</option>
+              <option>Not sure yet</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Preferred Date</label><input type="date" id="prefDate"></div>
+        </div>
+        <div class="form-group"><label>Tell us about your space</label><textarea placeholder="e.g. Living room wall, approx 2m wide. Looking for a reef setup with colourful fish…" id="message"></textarea></div>
+        <button class="submit-btn" id="submitBtn">Book Free Consultation <span>🐟</span></button>
+      </div>
+    </div>
+    <div class="popup-success" id="successMsg">
+      <div class="success-icon">🎉</div>
+      <h3>You're all booked in!</h3>
+      <p>Thank you! One of our expert aquarists will contact you within 24 hours to discuss your dream aquarium.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════
+     NAV — RESPONSIVE
+════════════════════ -->
+<nav id="navbar">
+  <div class="nav-inner">
+    <a href="#" class="logo"><span>🐟</span> AquaWorld</a>
+
+    <!-- Desktop links -->
+    <ul class="nav-links">
+      <li><a href="#">Home</a></li>
+      <li><a href="about.html">About Us</a></li>
+      <li><a href="features.html">Features</a></li>
+      <li><a href="collection.html">Collection</a></li>
+      <li><a href="aquariums.html">Aquarium</a></li>
+      <li><a href="process.html">Process</a></li>
+      <li><a href="reviews.html">Reviews</a></li>
+      <li><a href="#" class="nav-cta" id="openConsult">Contact Us</a></li>
+    </ul>
+
+    <!-- Hamburger (mobile only) -->
+    <button class="nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </div>
+
+  <!-- Mobile drawer -->
+  <div class="nav-drawer" id="navDrawer">
+    <a href="#">Home</a>
+    <a href="about.html">About Us</a>
+    <a href="features.html">Features</a>
+    <a href="collection.html">Collection</a>
+    <a href="aquariums.html">Aquarium</a>
+    <a href="process.html">Process</a>
+    <a href="reviews.html">Reviews</a>
+    <a href="#" class="drawer-cta" id="openConsultMobile">Contact Us</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-scene"></div>
+  <div class="parallax-fish" style="top:15%; left:5%; font-size:8rem;" data-speed="0.2">🐙</div>
+  <div class="parallax-fish" style="top:70%; left:2%; font-size:4rem;" data-speed="0.3">🦀</div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">Aquarium Design · Supply · Installation</div>
+    <h1 class="hero-title">We Build &<br><em>Install Custom</em><br>Aquariums</h1>
+    <p class="hero-sub">AquaWorld designs, supplies and fully installs stunning aquarium tanks for homes, offices and commercial spaces — from compact nano tanks to breathtaking floor-to-ceiling reef walls.</p>
+    <div class="hero-btns">
+      <a href="collection.html" class="btn-primary">Browse Our Tanks</a>
+      <a href="process.html" class="btn-outline">How It Works →</a>
+    </div>
+    <div class="hero-stats">
+      <div class="stat-item"><h3>50+</h3><p>Tank Models</p></div>
+      <div class="stat-item"><h3>12k+</h3><p>Tanks Installed</p></div>
+      <div class="stat-item"><h3>98%</h3><p>Satisfaction</p></div>
+    </div>
+  </div>
+  <svg class="wave-divider" viewBox="0 0 1440 80" preserveAspectRatio="none" style="height:80px;">
+    <path d="M0,60 C240,20 480,80 720,50 C960,20 1200,70 1440,40 L1440,80 L0,80 Z" fill="white"/>
+  </svg>
+</section>
+
+<!-- FEATURES -->
+<section id="features" style="position:relative; overflow:hidden;">
+  <div id="section-fish">🐠</div>
+  <div class="features-header reveal">
+    <div class="section-label">Why Choose Us</div>
+    <h2 class="section-title">Crafted for Every<br>Aquatic Dream</h2>
+  </div>
+  <div class="features-grid">
+    <div class="feature-card reveal stagger-1"><span class="feature-icon">🌊</span><h3>Crystal Clear Water</h3><p>Our advanced multi-stage filtration systems maintain pristine water quality, keeping your aquatic pets healthy and your tank sparkling clean around the clock.</p></div>
+    <div class="feature-card reveal stagger-2"><span class="feature-icon">💡</span><h3>Programmable LED Lighting</h3><p>Simulate natural sunrise to sunset cycles with our smart LED systems. Customizable spectrum settings promote coral growth and fish health beautifully.</p></div>
+    <div class="feature-card reveal stagger-3"><span class="feature-icon">🌡️</span><h3>Smart Temperature Control</h3><p>Precision heating and cooling keeps water temperature stable within ±0.5°C — critical for tropical and cold-water species alike.</p></div>
+    <div class="feature-card reveal stagger-1"><span class="feature-icon">📱</span><h3>App-Connected Monitoring</h3><p>Monitor pH, temperature, and filter cycles from your phone. Receive alerts and adjust settings remotely with our intuitive mobile app.</p></div>
+    <div class="feature-card reveal stagger-2"><span class="feature-icon">🪸</span><h3>Live Coral & Plants</h3><p>Handpicked, ethically sourced live corals, plants, and invertebrates to create a thriving, natural ecosystem inside your home.</p></div>
+    <div class="feature-card reveal stagger-3"><span class="feature-icon">🎓</span><h3>Expert Aquarist Support</h3><p>Our team of certified marine biologists and aquarists is available 7 days a week to guide setup, troubleshoot, and advise on livestock choices.</p></div>
+  </div>
+</section>
+
+<!-- COLLECTION -->
+<section id="collection">
+  <div class="collection-header">
+    <div>
+      <div class="section-label reveal">Our Tanks</div>
+      <h2 class="section-title reveal">Aquarium Collection</h2>
+    </div>
+    <a href="collection.html" class="btn-outline reveal" style="flex-shrink:0;">View All Tanks →</a>
+  </div>
+  <div class="tank-grid">
+    <!-- Tank 1 -->
+    <div class="tank-card reveal stagger-1">
+      <span class="tank-tag" style="background:linear-gradient(135deg,#55efc4,#00b894);">Nano</span>
+      <div class="tank-visual" style="background: linear-gradient(180deg, #e0f7f4 0%, #a8e6cf 50%, #5dade2 80%, #2e86c1 100%);">
+        <svg viewBox="0 0 340 240" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+          <rect x="0" y="80" width="340" height="160" fill="rgba(93,173,226,0.25)" rx="0"/>
+          <ellipse cx="170" cy="228" rx="175" ry="20" fill="#e8d5a3" opacity="0.7"/>
+          <ellipse cx="60" cy="220" rx="28" ry="14" fill="#8fa3b1" opacity="0.8"/>
+          <ellipse cx="280" cy="218" rx="22" ry="12" fill="#8fa3b1" opacity="0.8"/>
+          <line x1="40" y1="220" x2="35" y2="160" stroke="#27ae60" stroke-width="2.5" opacity="0.8"/>
+          <line x1="40" y1="220" x2="52" y2="155" stroke="#27ae60" stroke-width="2" opacity="0.7"/>
+          <ellipse cx="35" cy="158" rx="14" ry="9" fill="#2ecc71" opacity="0.7"/>
+          <ellipse cx="52" cy="153" rx="11" ry="7" fill="#27ae60" opacity="0.75"/>
+          <line x1="300" y1="218" x2="305" y2="155" stroke="#1abc9c" stroke-width="2.5" opacity="0.8"/>
+          <ellipse cx="305" cy="153" rx="13" ry="8" fill="#16a085" opacity="0.7"/>
+          <path d="M160 220 Q158 195 155 180 Q162 185 165 175 Q168 185 172 180 Q175 195 173 220 Z" fill="#e74c3c" opacity="0.6"/>
+          <circle cx="155" cy="178" r="7" fill="#e74c3c" opacity="0.5"/>
+          <circle cx="165" cy="173" r="8" fill="#c0392b" opacity="0.5"/>
+          <circle cx="172" cy="178" r="7" fill="#e74c3c" opacity="0.5"/>
+        </svg>
+        <span class="fish-swim-1">🐠</span>
+        <span class="fish-swim-2" style="animation-delay:-3s;">🐟</span>
+        <span class="bubble-small" style="left:30%; bottom:30%;"></span>
+        <span class="bubble-small" style="left:60%; bottom:20%; animation-delay:-1.2s;"></span>
+        <div class="tank-frame"></div>
+      </div>
+      <div class="tank-card-body">
+        <h4>Nano Cube 30L</h4>
+        <p>Perfect for desks and shelves. Compact rimless design with integrated filtration — ideal for shrimp, nano fish, and lush planted scapes.</p>
+        <div class="tank-specs"><span class="tank-spec-tag">30 Litres</span><span class="tank-spec-tag">30×30×33 cm</span><span class="tank-spec-tag">Planted</span></div>
+      </div>
+    </div>
+    <!-- Tank 2 -->
+    <div class="tank-card reveal stagger-2">
+      <span class="tank-tag" style="background:linear-gradient(135deg,#74b9ff,#0984e3);">Bestseller</span>
+      <div class="tank-visual" style="background: linear-gradient(180deg, #d6eaf8 0%, #85c1e9 50%, #2471a3 80%, #1a5276 100%);">
+        <svg viewBox="0 0 340 240" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+          <rect x="0" y="60" width="340" height="180" fill="rgba(52,152,219,0.2)" rx="0"/>
+          <ellipse cx="170" cy="232" rx="178" ry="18" fill="#c9a96e" opacity="0.65"/>
+          <ellipse cx="170" cy="222" rx="80" ry="18" fill="#7d6608" opacity="0.3"/>
+          <ellipse cx="80" cy="225" rx="40" ry="15" fill="#95a5a6" opacity="0.7"/>
+          <ellipse cx="260" cy="224" rx="50" ry="14" fill="#95a5a6" opacity="0.7"/>
+          <path d="M80 224 Q75 195 72 175 Q80 182 83 168 Q87 182 90 175 Q93 195 88 224 Z" fill="#e67e22" opacity="0.7"/>
+          <circle cx="72" cy="173" r="9" fill="#e67e22" opacity="0.6"/>
+          <circle cx="83" cy="166" r="10" fill="#d35400" opacity="0.6"/>
+          <circle cx="90" cy="173" r="9" fill="#e67e22" opacity="0.6"/>
+          <path d="M265 222 Q262 198 260 182 Q267 188 270 175 Q274 188 277 182 Q275 198 272 222 Z" fill="#e91e8c" opacity="0.6"/>
+          <circle cx="260" cy="180" r="9" fill="#e91e8c" opacity="0.55"/>
+          <circle cx="270" cy="173" r="11" fill="#c2185b" opacity="0.55"/>
+          <circle cx="277" cy="180" r="9" fill="#e91e8c" opacity="0.55"/>
+          <line x1="100" y1="60" x2="80" y2="200" stroke="rgba(255,255,255,0.12)" stroke-width="18"/>
+          <line x1="180" y1="60" x2="165" y2="200" stroke="rgba(255,255,255,0.1)" stroke-width="14"/>
+        </svg>
+        <span class="fish-swim-1" style="animation-delay:-1s;">🐡</span>
+        <span class="fish-swim-2" style="animation-delay:-4s;">🐠</span>
+        <span class="bubble-small" style="left:20%; bottom:40%; animation-delay:-0.5s;"></span>
+        <span class="bubble-small" style="left:70%; bottom:30%; animation-delay:-1.8s;"></span>
+        <div class="tank-frame"></div>
+      </div>
+      <div class="tank-card-body">
+        <h4>Reef Panorama 200L</h4>
+        <p>Our most popular tank. A wide panoramic rimless display with live rock aquascape, optimised for vibrant coral and marine fish communities.</p>
+        <div class="tank-specs"><span class="tank-spec-tag">200 Litres</span><span class="tank-spec-tag">100×50×45 cm</span><span class="tank-spec-tag">Reef Ready</span></div>
+      </div>
+    </div>
+    <!-- Tank 3 -->
+    <div class="tank-card reveal stagger-3">
+      <span class="tank-tag" style="background:linear-gradient(135deg,#a8e6cf,#27ae60);">Planted</span>
+      <div class="tank-visual" style="background: linear-gradient(180deg, #eafaf1 0%, #a9dfbf 50%, #1e8449 80%, #145a32 100%);">
+        <svg viewBox="0 0 340 240" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+          <rect x="0" y="70" width="340" height="170" fill="rgba(39,174,96,0.15)"/>
+          <ellipse cx="170" cy="232" rx="178" ry="18" fill="#b7950b" opacity="0.5"/>
+          <ellipse cx="170" cy="226" rx="160" ry="12" fill="#27ae60" opacity="0.5"/>
+          <path d="M30 224 Q25 180 28 140 Q36 158 40 130 Q45 158 48 140 Q50 180 45 224 Z" fill="#1a8a3c" opacity="0.8"/>
+          <path d="M290 224 Q285 182 288 142 Q295 160 298 132 Q302 160 305 142 Q308 182 304 224 Z" fill="#1a8a3c" opacity="0.8"/>
+          <path d="M110 222 Q106 195 109 170 Q115 182 118 162 Q121 182 124 170 Q127 195 123 222 Z" fill="#2ecc71" opacity="0.7"/>
+          <path d="M200 220 Q197 193 200 168 Q206 180 209 160 Q212 180 215 168 Q217 193 213 220 Z" fill="#2ecc71" opacity="0.7"/>
+          <line x1="90" y1="70" x2="70" y2="210" stroke="rgba(255,255,255,0.15)" stroke-width="22"/>
+          <line x1="200" y1="70" x2="188" y2="210" stroke="rgba(255,255,255,0.1)" stroke-width="16"/>
+        </svg>
+        <span class="fish-swim-1" style="animation-delay:-2s;">🐟</span>
+        <span class="fish-swim-2" style="animation-delay:-5s; font-size:0.8rem;">🐡</span>
+        <span class="bubble-small" style="left:25%; bottom:35%; animation-delay:-0.3s;"></span>
+        <div class="tank-frame"></div>
+      </div>
+      <div class="tank-card-body">
+        <h4>Dutch Planted 120L</h4>
+        <p>A lush freshwater garden. Layers of vibrant aquatic plants create a living painting. Includes CO₂ system and soil substrate for optimal growth.</p>
+        <div class="tank-specs"><span class="tank-spec-tag">120 Litres</span><span class="tank-spec-tag">80×40×40 cm</span><span class="tank-spec-tag">CO₂ System</span></div>
+      </div>
+    </div>
+    <!-- Tank 4 -->
+    <div class="tank-card reveal stagger-4">
+      <span class="tank-tag" style="background:linear-gradient(135deg,#f39c12,#d35400);">Exotic</span>
+      <div class="tank-visual" style="background: linear-gradient(180deg, #fdf2e9 0%, #e59866 50%, #784212 80%, #4a235a 100%);">
+        <svg viewBox="0 0 340 240" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+          <rect x="0" y="70" width="340" height="170" fill="rgba(120,66,11,0.25)"/>
+          <ellipse cx="170" cy="232" rx="178" ry="18" fill="#784212" opacity="0.6"/>
+          <path d="M20 224 Q40 200 80 195 Q110 190 140 210 Q160 220 170 224" stroke="#5d4037" stroke-width="12" fill="none" stroke-linecap="round" opacity="0.8"/>
+          <path d="M80 195 Q90 175 95 155" stroke="#5d4037" stroke-width="8" fill="none" stroke-linecap="round" opacity="0.7"/>
+          <path d="M200 218 Q230 200 275 195 Q300 192 330 210" stroke="#4e342e" stroke-width="11" fill="none" stroke-linecap="round" opacity="0.75"/>
+          <ellipse cx="95" cy="152" rx="18" ry="28" fill="#1b5e20" opacity="0.65" transform="rotate(-15,95,152)"/>
+          <ellipse cx="80" cy="162" rx="14" ry="22" fill="#2e7d32" opacity="0.6" transform="rotate(10,80,162)"/>
+        </svg>
+        <span class="fish-swim-1" style="animation-delay:-1.5s; font-size:1.6rem;">🐟</span>
+        <span class="fish-swim-2" style="animation-delay:-4.5s; font-size:1.1rem;">🐠</span>
+        <span class="bubble-small" style="left:40%; bottom:30%; animation-delay:-1s;"></span>
+        <div class="tank-frame"></div>
+      </div>
+      <div class="tank-card-body">
+        <h4>Blackwater Biotope 180L</h4>
+        <p>An authentic Amazon river experience. Driftwood, leaf litter and tannin-rich water recreate a true biotope for Discus, Altum Angels and rare tetras.</p>
+        <div class="tank-specs"><span class="tank-spec-tag">180 Litres</span><span class="tank-spec-tag">90×45×45 cm</span><span class="tank-spec-tag">Biotope</span></div>
+      </div>
+    </div>
+    <!-- Tank 5 -->
+    <div class="tank-card reveal stagger-1">
+      <span class="tank-tag" style="background:linear-gradient(135deg,#c39bd3,#7d3c98);">Premium</span>
+      <div class="tank-visual" style="background: linear-gradient(180deg, #f4ecf7 0%, #d7bde2 50%, #7d3c98 80%, #4a235a 100%);">
+        <svg viewBox="0 0 340 240" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+          <rect x="0" y="50" width="340" height="190" fill="rgba(125,60,152,0.2)"/>
+          <ellipse cx="170" cy="233" rx="178" ry="18" fill="#caa472" opacity="0.55"/>
+          <path d="M80 224 Q90 195 110 178 Q130 170 150 178 Q165 190 160 224 Z" fill="#7f8c8d" opacity="0.6"/>
+          <path d="M190 224 Q200 196 220 180 Q240 170 258 178 Q268 192 265 224 Z" fill="#95a5a6" opacity="0.6"/>
+          <line x1="60" y1="50" x2="45" y2="180" stroke="rgba(255,255,255,0.18)" stroke-width="28"/>
+          <line x1="200" y1="50" x2="185" y2="180" stroke="rgba(255,255,255,0.1)" stroke-width="20"/>
+        </svg>
+        <span class="fish-swim-1" style="animation-delay:-0.8s; font-size:1.5rem;">🐡</span>
+        <span class="fish-swim-2" style="animation-delay:-3.5s; font-size:1.1rem;">🦑</span>
+        <span class="bubble-small" style="left:15%; bottom:40%; animation-delay:-0.6s;"></span>
+        <span class="bubble-small" style="left:55%; bottom:25%; animation-delay:-1.5s;"></span>
+        <div class="tank-frame"></div>
+      </div>
+      <div class="tank-card-body">
+        <h4>Apex Wall Display 600L</h4>
+        <p>A statement piece for lobbies and living rooms. Floor-to-ceiling rimless wall aquarium with full SPS reef — custom built to your exact dimensions.</p>
+        <div class="tank-specs"><span class="tank-spec-tag">600 Litres</span><span class="tank-spec-tag">Custom Size</span><span class="tank-spec-tag">Full Setup</span></div>
+      </div>
+    </div>
+    <!-- Tank 6 -->
+    <div class="tank-card reveal stagger-2">
+      <span class="tank-tag" style="background:linear-gradient(135deg,#aed6f1,#2471a3);">Commercial</span>
+      <div class="tank-visual" style="background: linear-gradient(180deg, #eaf4fb 0%, #7fb3d3 50%, #1a5276 80%, #0a2a4a 100%);">
+        <svg viewBox="0 0 340 240" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+          <rect x="0" y="55" width="340" height="185" fill="rgba(26,82,118,0.18)"/>
+          <ellipse cx="170" cy="232" rx="178" ry="18" fill="#b7950b" opacity="0.4"/>
+          <rect x="50" y="200" width="240" height="28" rx="6" fill="#5d6d7e" opacity="0.5"/>
+          <ellipse cx="130" cy="200" rx="45" ry="24" fill="#7f8c8d" opacity="0.7"/>
+          <ellipse cx="195" cy="204" rx="30" ry="18" fill="#95a5a6" opacity="0.65"/>
+          <line x1="120" y1="55" x2="100" y2="190" stroke="rgba(255,255,255,0.16)" stroke-width="32"/>
+          <line x1="230" y1="55" x2="215" y2="190" stroke="rgba(255,255,255,0.12)" stroke-width="24"/>
+        </svg>
+        <span class="fish-swim-1" style="animation-delay:-2.2s; font-size:1.2rem;">🐟</span>
+        <span class="fish-swim-2" style="animation-delay:-5.5s; font-size:0.9rem;">🐠</span>
+        <span class="bubble-small" style="left:35%; bottom:38%; animation-delay:-0.7s;"></span>
+        <div class="tank-frame"></div>
+      </div>
+      <div class="tank-card-body">
+        <h4>Iwagumi Office Divider 350L</h4>
+        <p>Transform your workspace. A sleek minimalist aquascape doubles as a stunning room divider — impresses clients and calms employees alike.</p>
+        <div class="tank-specs"><span class="tank-spec-tag">350 Litres</span><span class="tank-spec-tag">150×50×50 cm</span><span class="tank-spec-tag">Iwagumi</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SHOWCASE -->
+<section id="showcase">
+  <div class="section-label reveal-left">Aquarium Range</div>
+  <h2 class="section-title reveal-left">360° Tank<br>Showcase</h2>
+  <div class="showcase-inner">
+    <div class="showcase-3d" data-parallax="0.15">
+      <div style="position:relative;">
+        <div class="glow-ring"></div>
+        <div class="glow-ring"></div>
+        <div class="glow-ring"></div>
+        <div class="cube-tank" id="cubeTank">
+          <div class="face front">🐠</div>
+          <div class="face back">🐡</div>
+          <div class="face left">🌿</div>
+          <div class="face right">🪸</div>
+          <div class="face top">💧</div>
+          <div class="face bottom">🪨</div>
+        </div>
+      </div>
+    </div>
+    <div class="showcase-text reveal-right">
+      <h3>The Apex Series<br>Rimless Tank</h3>
+      <p>Engineered with ultra-clear Optiwhite glass, seamless silicone joints, and an integrated sump system. Our Apex Series is the benchmark for serious aquarists who demand both beauty and performance.</p>
+      <ul class="spec-list">
+        <li>Ultra-clear 12mm Optiwhite Low-Iron Glass</li>
+        <li>Integrated overflow and sump system</li>
+        <li>Available in 120L, 200L, 350L, and 600L</li>
+        <li>Custom aquascaping service available</li>
+        <li>5-year structural warranty included</li>
+        <li>Matching cabinet and canopy options</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- PROCESS -->
+<section id="process">
+  <div class="process-header">
+    <div class="section-label reveal" style="justify-content:center;">How It Works</div>
+    <h2 class="section-title reveal">Your Journey to<br>a Perfect Aquarium</h2>
+  </div>
+  <div class="process-steps">
+    <div class="step reveal stagger-1"><div class="step-num"><span class="step-icon">💬</span>01</div><h4>Consultation</h4><p>We discuss your space, budget, and dream aesthetic in a free 30-minute call with an expert aquarist.</p></div>
+    <div class="step reveal stagger-2"><div class="step-num"><span class="step-icon">🎨</span>02</div><h4>Custom Design</h4><p>Receive a tailored 3D render of your aquarium with proposed livestock and aquascape layout.</p></div>
+    <div class="step reveal stagger-3"><div class="step-num"><span class="step-icon">🚚</span>03</div><h4>Delivery & Setup</h4><p>Our team delivers, installs, and fully cycles your tank — ready for livestock in days, not weeks.</p></div>
+    <div class="step reveal stagger-4"><div class="step-num"><span class="step-icon">🌊</span>04</div><h4>Ongoing Care</h4><p>Monthly maintenance packages and 24/7 app support ensure your tank stays spectacular, always.</p></div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section id="testimonials">
+  <div class="testimonials-header">
+    <div class="section-label reveal" style="justify-content:center;">Reviews</div>
+    <h2 class="section-title reveal">What Our Aquarists Say</h2>
+  </div>
+  <div class="testimonials-track-outer">
+    <div class="testimonials-track" id="testimonialsTrack">
+      <div class="tcard"><div class="tcard-stars">★★★★★</div><p>"The Apex 350L transformed my living room. Guests spend hours just watching it. Best investment I've made."</p><div class="tcard-author"><div class="tcard-avatar">👨</div><div><h5>James R.</h5><p>Marine Enthusiast</p></div></div></div>
+      <div class="tcard"><div class="tcard-stars">★★★★★</div><p>"The setup team was incredible. Crystal clear water from day one. My clownfish pair are thriving!"</p><div class="tcard-author"><div class="tcard-avatar">👩</div><div><h5>Sarah K.</h5><p>First-time Aquarist</p></div></div></div>
+      <div class="tcard"><div class="tcard-stars">★★★★★</div><p>"The app monitoring is a game changer. I check my parameters from the office. Absolutely brilliant."</p><div class="tcard-author"><div class="tcard-avatar">🧑</div><div><h5>Mike T.</h5><p>Tech Hobbyist</p></div></div></div>
+      <div class="tcard"><div class="tcard-stars">★★★★☆</div><p>"Our office now has a 600L reef wall. Employees love it, clients are impressed. AquaWorld delivered everything."</p><div class="tcard-author"><div class="tcard-avatar">👩‍💼</div><div><h5>Priya M.</h5><p>Business Owner</p></div></div></div>
+      <div class="tcard"><div class="tcard-stars">★★★★★</div><p>"The coral selection is breathtaking. My torch corals are growing and my mandarin dragonet is fat and happy."</p><div class="tcard-author"><div class="tcard-avatar">🧔</div><div><h5>David L.</h5><p>Reef Keeper</p></div></div></div>
+      <div class="tcard"><div class="tcard-stars">★★★★★</div><p>"Monthly maintenance service is worth every penny. My tank looks professionally maintained 24/7."</p><div class="tcard-author"><div class="tcard-avatar">👩‍🦰</div><div><h5>Lisa B.</h5><p>Casual Hobbyist</p></div></div></div>
+      <div class="tcard"><div class="tcard-stars">★★★★★</div><p>"The shrimp colony I ordered arrived healthy and acclimated perfectly. Outstanding livestock quality."</p><div class="tcard-author"><div class="tcard-avatar">👦</div><div><h5>Omar F.</h5><p>Nano Tank Specialist</p></div></div></div>
+      <div class="tcard"><div class="tcard-stars">★★★★★</div><p>"Hands down the best aquarium experience. The 3D design preview was exactly what I got. No surprises."</p><div class="tcard-author"><div class="tcard-avatar">👩‍🦱</div><div><h5>Aisha N.</h5><p>Interior Designer</p></div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- NEWSLETTER -->
+<section id="newsletter">
+  <div class="parallax-fish" style="top:10%; left:3%; font-size:6rem; opacity:0.08;">🐋</div>
+  <div class="parallax-fish" style="bottom:10%; right:3%; font-size:5rem; opacity:0.08; transform:scaleX(-1);">🐬</div>
+  <div class="section-label reveal" style="justify-content:center; color:rgba(255,255,255,0.7);">Stay Inspired</div>
+  <h2 class="section-title reveal">Dive Into Our<br>Weekly Newsletter</h2>
+  <p class="reveal">Get expert aquarium tips, new species arrivals, and exclusive deals delivered to your inbox.</p>
+  <div class="nl-form reveal">
+    <input type="email" placeholder="your@email.com">
+    <button type="button">Subscribe</button>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════
+     FOOTER — FULLY RESPONSIVE
+════════════════════════════════════════ -->
+<footer>
+  <div class="footer-top">
+
+    <!-- Brand column -->
+    <div class="footer-brand">
+      <a href="#" class="logo"><span>🐟</span> AquaWorld</a>
+      <p>Creating stunning underwater worlds for homes, offices and public spaces since 2008. Certified, ethical, extraordinary.</p>
+    </div>
+
+    <!-- Aquariums -->
+    <div class="footer-col">
+      <h5>Aquariums</h5>
+      <ul>
+        <li><a href="#">Nano Cube 30L</a></li>
+        <li><a href="#">Reef Panorama 200L</a></li>
+        <li><a href="#">Dutch Planted 120L</a></li>
+        <li><a href="#">Blackwater Biotope 180L</a></li>
+        <li><a href="#">Apex Wall Display 600L</a></li>
+        <li><a href="#">Iwagumi Office Divider 350L</a></li>
+      </ul>
+    </div>
+
+    <!-- Services -->
+    <div class="footer-col">
+      <h5>Services</h5>
+      <ul>
+        <li><a href="#">Tank Installation</a></li>
+        <li><a href="#">Monthly Maintenance</a></li>
+        <li><a href="#">Aquascape Design</a></li>
+        <li><a href="#">Water Testing</a></li>
+        <li><a href="#">Emergency Callout</a></li>
+      </ul>
+    </div>
+
+    <!-- Company -->
+    <div class="footer-col">
+      <h5>Company</h5>
+      <ul>
+        <li><a href="about.html">About Us</a></li>
+        <li><a href="features.html">Features</a></li>
+        <li><a href="collection.html">Collection</a></li>
+        <li><a href="aquariums.html">Aquarium</a></li>
+        <li><a href="process.html">Process</a></li>
+        <li><a href="reviews.html">Reviews</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Bottom bar -->
+  <div class="footer-bottom">
+    <p>© 2026 AquaWorld. Designed and Developed by Maryam, Hania, Muntaha and Ayesha</p>
+      </div>
+</footer>
+
+<script>
+// ── CURSOR ──
+const cursor = document.getElementById('cursor');
+const ring = document.getElementById('cursorRing');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove', e => {
+  mx = e.clientX; my = e.clientY;
+  cursor.style.left = mx+'px'; cursor.style.top = my+'px';
+});
+function animateRing() {
+  rx += (mx - rx) * 0.12;
+  ry += (my - ry) * 0.12;
+  ring.style.left = rx+'px'; ring.style.top = ry+'px';
+  requestAnimationFrame(animateRing);
+}
+animateRing();
+
+// ── BUBBLES ──
+const bg = document.getElementById('bubblesBg');
+for (let i = 0; i < 24; i++) {
+  const b = document.createElement('div');
+  b.className = 'bubble';
+  const size = 6 + Math.random()*18;
+  const dur = 10 + Math.random()*20;
+  const delay = Math.random() * 20;
+  const dx = (Math.random()-0.5)*120;
+  b.style.cssText = `left:${Math.random()*100}%;width:${size}px;height:${size}px;animation-duration:${dur}s;animation-delay:-${delay}s;--dx:${dx}px;`;
+  bg.appendChild(b);
+}
+
+// ── SECTION FISH ──
+const sectionFish = document.getElementById('section-fish');
+const featuresSection = document.getElementById('features');
+function updateSectionFish() {
+  if (!featuresSection || !sectionFish) return;
+  const secTop = featuresSection.offsetTop;
+  const secH = featuresSection.offsetHeight;
+  const sy = window.scrollY;
+  const inSection = sy + window.innerHeight > secTop && sy < secTop + secH;
+  sectionFish.style.opacity = inSection ? '0.55' : '0';
+  if (inSection) {
+    const progress = Math.max(0, Math.min(1, (sy - (secTop - window.innerHeight)) / (secH + window.innerHeight)));
+    const totalTravel = window.innerWidth + 160;
+    const x = window.innerWidth + 60 - progress * totalTravel;
+    const bob = Math.sin(progress * Math.PI * 4) * 22;
+    sectionFish.style.transform = `translateX(${x}px) translateY(calc(-50% + ${bob}px)) scaleX(-1)`;
+  }
+}
+window.addEventListener('scroll', updateSectionFish, { passive: true });
+updateSectionFish();
+
+// ── SCROLL PROGRESS ──
+const pbar = document.getElementById('progressBar');
+window.addEventListener('scroll', () => {
+  const h = document.documentElement;
+  pbar.style.width = (window.scrollY / (h.scrollHeight - h.clientHeight)) * 100 + '%';
+});
+
+// ── NAV SCROLL ──
+const navbar = document.getElementById('navbar');
+window.addEventListener('scroll', () => {
+  navbar.classList.toggle('scrolled', window.scrollY > 60);
+});
+
+// ── HAMBURGER MENU ──
+const navToggle = document.getElementById('navToggle');
+const navDrawer = document.getElementById('navDrawer');
+
+navToggle.addEventListener('click', () => {
+  const isOpen = navDrawer.classList.toggle('open');
+  navToggle.classList.toggle('open', isOpen);
+  navToggle.setAttribute('aria-expanded', isOpen);
+});
+
+// Close drawer when a link is clicked
+navDrawer.querySelectorAll('a').forEach(link => {
+  link.addEventListener('click', () => {
+    navDrawer.classList.remove('open');
+    navToggle.classList.remove('open');
+    navToggle.setAttribute('aria-expanded', false);
+  });
+});
+
+// Close drawer on outside click
+document.addEventListener('click', e => {
+  if (!navbar.contains(e.target)) {
+    navDrawer.classList.remove('open');
+    navToggle.classList.remove('open');
+    navToggle.setAttribute('aria-expanded', false);
+  }
+});
+
+// ── SCROLL REVEAL ──
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.12 });
+document.querySelectorAll('.reveal,.reveal-left,.reveal-right').forEach(el => observer.observe(el));
+
+// ── TESTIMONIALS DUPLICATE ──
+const track = document.getElementById('testimonialsTrack');
+track.innerHTML += track.innerHTML;
+
+// ── PARALLAX ──
+window.addEventListener('scroll', () => {
+  const sy = window.scrollY;
+  document.querySelectorAll('.parallax-fish[data-speed]').forEach(el => {
+    el.style.transform = `translateY(${sy * parseFloat(el.dataset.speed)}px)`;
+  });
+});
+
+// ── CUBE TILT ──
+const cube = document.getElementById('cubeTank');
+const showcaseEl = document.getElementById('showcase');
+if (cube && showcaseEl) {
+  showcaseEl.addEventListener('mousemove', e => {
+    const rect = showcaseEl.getBoundingClientRect();
+    const cx = (e.clientX - rect.left) / rect.width - 0.5;
+    const cy = (e.clientY - rect.top) / rect.height - 0.5;
+    cube.style.animationPlayState = 'paused';
+    cube.style.transform = `rotateY(${cx*40}deg) rotateX(${-cy*20 + 15}deg)`;
+  });
+  showcaseEl.addEventListener('mouseleave', () => {
+    cube.style.animationPlayState = 'running';
+    cube.style.transform = '';
+  });
+}
+
+// ── SMOOTH SCROLL ──
+document.querySelectorAll('a[href^="#"]:not(#openConsult):not(#openConsultMobile)').forEach(a => {
+  a.addEventListener('click', e => {
+    const target = document.querySelector(a.getAttribute('href'));
+    if (target) { e.preventDefault(); target.scrollIntoView({ behavior:'smooth', block:'start' }); }
+  });
+});
+
+// ── POPUP ──
+const popup = document.getElementById('consultPopup');
+const popupClose = document.getElementById('popupClose');
+const openConsult = document.getElementById('openConsult');
+const openConsultMobile = document.getElementById('openConsultMobile');
+const submitBtn = document.getElementById('submitBtn');
+const formContent = document.getElementById('formContent');
+const successMsg = document.getElementById('successMsg');
+
+function openPopup(e) {
+  if (e) e.preventDefault();
+  popup.classList.add('active');
+  document.body.style.overflow = 'hidden';
+  formContent.style.display = '';
+  successMsg.classList.remove('show');
+  // Close mobile menu if open
+  navDrawer.classList.remove('open');
+  navToggle.classList.remove('open');
+}
+function closePopup() {
+  popup.classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+openConsult.addEventListener('click', openPopup);
+openConsultMobile.addEventListener('click', openPopup);
+popupClose.addEventListener('click', closePopup);
+popup.addEventListener('click', e => { if (e.target === popup) closePopup(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closePopup(); });
+
+submitBtn.addEventListener('click', () => {
+  const fname = document.getElementById('fname').value.trim();
+  const email = document.getElementById('email').value.trim();
+  if (!fname) { document.getElementById('fname').focus(); return; }
+  if (!email || !email.includes('@')) { document.getElementById('email').focus(); return; }
+  formContent.style.display = 'none';
+  successMsg.classList.add('show');
+  setTimeout(() => closePopup(), 3500);
+});
+</script>
+</body>
+</html>

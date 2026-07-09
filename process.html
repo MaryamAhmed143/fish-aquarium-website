@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AquaWorld – Our Process</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  /* ── HOME PAGE CSS VARIABLES (exact match) ── */
+  :root {
+    --deep: #0a2a4a;
+    --mid: #1a5276;
+    --sky: #5dade2;
+    --foam: #aed6f1;
+    --pearl: #e8f4fd;
+    --white: #ffffff;
+    --coral: #f0a07a;
+    --gold: #f7c948;
+    --mint: #a8e6cf;
+    --glow: rgba(93,173,226,0.4);
+    /* page extras */
+    --teal: #2db8b0;
+    --light-bg: #f4f9fd;
+    --text-muted: #6b8899;
+  }
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--pearl);
+    color: var(--deep);
+    overflow-x: hidden;
+  }
+
+  /* ── PROGRESS BAR ── */
+  .progress-bar {
+    position: fixed; top: 0; left: 0; height: 3px;
+    background: linear-gradient(90deg, var(--sky), var(--coral));
+    z-index: 9999; width: 0%; transition: width 0.1s;
+  }
+
+  /* ── NAV (home page exact) ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 60px;
+    backdrop-filter: blur(16px);
+    background: rgba(232,244,253,0.75);
+    border-bottom: 1px solid rgba(93,173,226,0.2);
+    transition: padding 0.3s, box-shadow 0.3s;
+  }
+  nav.scrolled { padding: 14px 60px; box-shadow: 0 4px 30px rgba(10,42,74,0.08); }
+  .logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem; color: var(--mid);
+    display: flex; align-items: center; gap: 10px; text-decoration: none;
+  }
+  .logo span { font-size: 1.6rem; }
+  .nav-links { display: flex; gap: 36px; list-style: none; }
+  .nav-links a {
+    text-decoration: none; color: var(--mid);
+    font-size: 0.9rem; font-weight: 500; letter-spacing: 0.04em;
+    position: relative; padding-bottom: 10px;
+  }
+  .nav-links a::after {
+    content: ''; position: absolute; bottom: 0; left: 0;
+    width: 0; height: 2px; background: var(--sky);
+    transition: width 0.3s ease;
+  }
+  .nav-links a:hover::after { width: 100%; }
+  .nav-links a.active::after { width: 100%; }
+  .nav-cta {
+    background: var(--mid); color: white !important;
+    padding: 10px 24px 16px 24px; border-radius: 50px;
+    transition: background 0.3s, transform 0.2s !important;
+  }
+  .nav-cta:hover { background: var(--sky) !important; transform: translateY(-2px); }
+  .nav-cta::after { display: none !important; }
+
+  /* ── SCROLL REVEAL ── */
+  .reveal { opacity: 0; transform: translateY(40px); transition: opacity 0.7s ease, transform 0.7s ease; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+  .reveal-left { opacity: 0; transform: translateX(-50px); transition: opacity 0.8s ease, transform 0.8s ease; }
+  .reveal-left.visible { opacity: 1; transform: translateX(0); }
+  .reveal-right { opacity: 0; transform: translateX(50px); transition: opacity 0.8s ease, transform 0.8s ease; }
+  .reveal-right.visible { opacity: 1; transform: translateX(0); }
+  .stagger-1 { transition-delay: 0.1s !important; }
+  .stagger-2 { transition-delay: 0.2s !important; }
+  .stagger-3 { transition-delay: 0.3s !important; }
+  .stagger-4 { transition-delay: 0.4s !important; }
+
+  /* ── SECTION COMMONS ── */
+  section { position: relative; z-index: 2; }
+  .section-label {
+    font-size: 0.75rem; letter-spacing: 0.25em; text-transform: uppercase;
+    color: var(--sky); font-weight: 500; margin-bottom: 12px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .section-label::before { content: ''; width: 28px; height: 1.5px; background: var(--sky); }
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 3.5vw, 3rem); color: var(--deep); line-height: 1.2;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 520px; padding: 140px 60px 100px;
+    background: linear-gradient(160deg, #e8f4fd 0%, #aed6f1 40%, #5dade2 100%);
+    display: flex; align-items: center; justify-content: center;
+    text-align: center; position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(ellipse 70% 60% at 50% 120%, rgba(93,173,226,0.2) 0%, transparent 70%);
+  }
+  .hero-bubble {
+    position: absolute; border-radius: 50%;
+    background: rgba(255,255,255,0.4);
+    animation: float 6s ease-in-out infinite;
+  }
+  .hero-bubble:nth-child(1) { width: 80px; height: 80px; top: 20%; left: 8%; animation-delay: 0s; }
+  .hero-bubble:nth-child(2) { width: 40px; height: 40px; top: 60%; left: 15%; animation-delay: 1.5s; }
+  .hero-bubble:nth-child(3) { width: 60px; height: 60px; top: 30%; right: 10%; animation-delay: 0.8s; }
+  .hero-bubble:nth-child(4) { width: 25px; height: 25px; top: 70%; right: 18%; animation-delay: 2.2s; }
+  @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-16px); } }
+  .hero-eyebrow {
+    font-size: 0.8rem; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--mid); font-weight: 500; margin-bottom: 20px;
+    display: flex; align-items: center; justify-content: center; gap: 12px;
+  }
+  .hero-eyebrow::before { content: ''; width: 40px; height: 1.5px; background: var(--sky); }
+  .hero-eyebrow::after  { content: ''; width: 40px; height: 1.5px; background: var(--sky); }
+  .hero-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(3rem, 5.5vw, 5rem);
+    line-height: 1.1; color: var(--deep); margin-bottom: 24px;
+    position: relative; z-index: 1;
+  }
+  .hero-title em { color: var(--sky); font-style: italic; }
+  .hero-sub {
+    font-size: 1.05rem; line-height: 1.7; color: var(--mid);
+    max-width: 520px; margin: 0 auto 50px; font-weight: 300;
+    position: relative; z-index: 1;
+  }
+  .wave-divider { position: absolute; bottom: 0; left: 0; right: 0; }
+
+  /* Hero timeline indicator */
+  .hero-timeline {
+    display: flex; gap: 0; align-items: center; justify-content: center;
+    position: relative; z-index: 1;
+  }
+  .ht-step { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .ht-num {
+    width: 46px; height: 46px; border-radius: 50%;
+    background: var(--mid); color: white;
+    font-weight: 700; font-size: 0.9rem;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 6px 20px rgba(26,82,118,0.3);
+    font-family: 'Playfair Display', serif;
+    transition: background 0.3s;
+  }
+  .ht-step:hover .ht-num { background: var(--sky); }
+  .ht-step span { font-size: 0.72rem; color: var(--mid); font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; }
+  .ht-line {
+    width: 60px; height: 2px;
+    background: linear-gradient(90deg, var(--sky), var(--foam));
+    margin-bottom: 22px; flex-shrink: 0;
+  }
+
+  /* ── STEPS SECTION ── */
+  #steps { padding: 120px 60px; background: white; }
+  .steps-header { text-align: center; margin-bottom: 70px; }
+  .steps-header .section-label { justify-content: center; }
+  .steps-header .section-sub {
+    font-size: 1rem; color: var(--mid); font-weight: 300;
+    line-height: 1.7; max-width: 520px; margin: 16px auto 0;
+  }
+  .step-list { max-width: 860px; margin: 0 auto; display: flex; flex-direction: column; }
+  .step-item {
+    display: grid; grid-template-columns: 88px 1fr; gap: 36px; align-items: start;
+    padding: 44px 0; border-bottom: 1px solid rgba(93,173,226,0.12);
+  }
+  .step-item:last-child { border-bottom: none; }
+  .step-num-col { display: flex; flex-direction: column; align-items: center; }
+  .step-circle {
+    width: 58px; height: 58px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--sky), var(--teal));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem;
+    box-shadow: 0 6px 24px rgba(93,173,226,0.35); flex-shrink: 0;
+  }
+  .step-connector {
+    width: 2px; flex: 1; min-height: 48px;
+    background: linear-gradient(to bottom, rgba(93,173,226,0.3), transparent);
+    margin-top: 10px;
+  }
+  .step-item:last-child .step-connector { display: none; }
+  .step-tag {
+    font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.18em;
+    color: var(--sky); font-weight: 600; margin-bottom: 10px; display: block;
+  }
+  .step-item h3 {
+    font-family: 'Playfair Display', serif; font-size: 1.5rem;
+    font-weight: 700; color: var(--deep); margin-bottom: 14px;
+  }
+  .step-item p { font-size: 0.92rem; color: var(--mid); line-height: 1.8; margin-bottom: 20px; font-weight: 300; }
+  .step-detail { display: flex; gap: 14px; flex-wrap: wrap; }
+  .detail-pill {
+    background: var(--pearl); border: 1px solid rgba(93,173,226,0.15);
+    border-radius: 10px; padding: 10px 16px; font-size: 0.78rem; color: var(--mid);
+  }
+  .detail-pill strong { color: var(--deep); display: block; font-size: 0.88rem; font-weight: 600; margin-bottom: 2px; }
+
+  /* ── TIMELINE VISUAL ── */
+  #timeline {
+    padding: 120px 60px;
+    background: linear-gradient(180deg, var(--pearl) 0%, #d6eaf8 100%);
+  }
+  .timeline-header { text-align: center; margin-bottom: 60px; }
+  .timeline-header .section-label { justify-content: center; }
+  .timeline-header .section-sub {
+    font-size: 1rem; color: var(--mid); font-weight: 300;
+    line-height: 1.7; max-width: 500px; margin: 16px auto 0;
+  }
+  .timeline-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 28px; }
+  .tl-card {
+    background: white; border-radius: 20px; padding: 32px 24px;
+    border: 1px solid rgba(93,173,226,0.12);
+    text-align: center; position: relative;
+    box-shadow: 0 4px 20px rgba(10,42,74,0.06);
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
+  .tl-card:hover { transform: translateY(-6px); box-shadow: 0 16px 44px rgba(10,42,74,0.1); }
+  /* Connector line between cards */
+  .tl-card:not(:last-child)::after {
+    content: '→'; position: absolute;
+    right: -18px; top: 50%; transform: translateY(-50%);
+    color: var(--sky); font-size: 1.2rem; z-index: 3;
+  }
+  .tl-icon { font-size: 2.4rem; margin-bottom: 14px; display: block; }
+  .tl-step-num {
+    font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.2em;
+    color: var(--sky); font-weight: 600; margin-bottom: 10px;
+  }
+  .tl-card h4 { font-family: 'Playfair Display', serif; font-size: 1rem; font-weight: 700; color: var(--deep); margin-bottom: 10px; }
+  .tl-card p { font-size: 0.82rem; color: var(--mid); line-height: 1.65; font-weight: 300; }
+  .tl-duration {
+    margin-top: 16px; font-size: 0.72rem; color: var(--sky); font-weight: 600;
+    background: rgba(93,173,226,0.1); padding: 5px 14px;
+    border-radius: 20px; display: inline-block;
+    border: 1px solid rgba(93,173,226,0.2);
+  }
+
+  /* ── ONGOING CARE (dark, like home showcase) ── */
+  #ongoing {
+    padding: 120px 60px;
+    background: linear-gradient(135deg, var(--deep) 0%, var(--mid) 100%);
+    color: white; overflow: hidden;
+  }
+  #ongoing .section-label { color: var(--foam); }
+  #ongoing .section-label::before { background: var(--foam); }
+  #ongoing .section-title { color: white; margin-bottom: 14px; }
+  #ongoing .section-sub {
+    font-size: 1rem; color: rgba(255,255,255,0.6); font-weight: 300;
+    line-height: 1.7; max-width: 500px; margin-bottom: 60px;
+  }
+  .care-options { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  .care-plan {
+    border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; padding: 36px 28px;
+    background: rgba(255,255,255,0.05); text-align: center;
+    transition: border-color 0.3s, background 0.3s, transform 0.3s;
+  }
+  .care-plan:hover { border-color: rgba(93,173,226,0.4); background: rgba(93,173,226,0.08); transform: translateY(-4px); }
+  .care-plan.featured-plan {
+    border-color: var(--sky); background: rgba(93,173,226,0.1);
+    box-shadow: 0 0 40px rgba(93,173,226,0.15);
+  }
+  .plan-icon { font-size: 2.5rem; margin-bottom: 18px; display: block; }
+  .plan-name { font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 700; color: white; margin-bottom: 8px; }
+  .plan-price { font-size: 1.8rem; font-family: 'Playfair Display', serif; color: var(--foam); font-weight: 700; margin: 12px 0 6px; }
+  .plan-price small { font-size: 0.8rem; color: rgba(255,255,255,0.4); font-family: 'DM Sans', sans-serif; font-weight: 300; }
+  .plan-desc { font-size: 0.85rem; color: rgba(255,255,255,0.55); line-height: 1.6; margin-bottom: 24px; }
+  .plan-features { text-align: left; list-style: none; display: flex; flex-direction: column; gap: 11px; margin-bottom: 28px; }
+  .plan-features li { font-size: 0.85rem; color: rgba(255,255,255,0.7); display: flex; gap: 10px; align-items: flex-start; line-height: 1.5; }
+  .plan-features li::before { content: '✓'; color: var(--teal); font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+  .btn-plan {
+    display: block; text-align: center; padding: 13px;
+    border-radius: 50px; font-size: 0.85rem; font-weight: 500;
+    text-decoration: none; transition: all 0.3s; letter-spacing: 0.04em;
+  }
+  .btn-plan.outline { border: 1.5px solid rgba(255,255,255,0.25); color: white; }
+  .btn-plan.outline:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.5); }
+  .btn-plan.solid { background: var(--sky); color: white; border: 1.5px solid var(--sky); }
+  .btn-plan.solid:hover { background: var(--foam); color: var(--deep); }
+
+  /* ── CTA  ── */
+  #cta {
+    padding: 100px 60px;
+    background: linear-gradient(135deg, #aed6f1, #5dade2 50%, #1a5276);
+    text-align: center; position: relative; overflow: hidden;
+  }
+  #cta .section-label { justify-content: center; color: rgba(255,255,255,0.7); }
+  #cta .section-label::before { background: rgba(255,255,255,0.7); }
+  #cta .section-title { color: white; margin-bottom: 16px; }
+  #cta .section-sub {
+    font-size: 1rem; color: rgba(255,255,255,0.8); font-weight: 300;
+    line-height: 1.7; max-width: 460px; margin: 0 auto 44px;
+  }
+  .cta-group { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+  .btn-white {
+    background: white; color: var(--mid); padding: 16px 36px;
+    border-radius: 50px; text-decoration: none; font-weight: 500;
+    font-size: 0.95rem; letter-spacing: 0.04em;
+    transition: all 0.3s; box-shadow: 0 8px 30px rgba(10,42,74,0.2);
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .btn-white:hover { background: var(--pearl); transform: translateY(-3px); }
+  .btn-outline-white {
+    border: 1.5px solid rgba(255,255,255,0.6); color: white;
+    padding: 15px 32px; border-radius: 50px; text-decoration: none;
+    font-weight: 500; font-size: 0.95rem; letter-spacing: 0.04em;
+    transition: all 0.3s; background: transparent;
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .btn-outline-white:hover { background: rgba(255,255,255,0.15); border-color: white; transform: translateY(-3px); }
+
+  /* ── FOOTER (home page exact) ── */
+  footer { background: var(--deep); color: rgba(255,255,255,0.7); padding: 80px 60px 40px; }
+  .footer-top { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 60px; margin-bottom: 60px; }
+  .footer-brand .logo { color: var(--foam); margin-bottom: 16px; }
+  .footer-brand p { font-size: 0.88rem; line-height: 1.7; max-width: 260px; font-weight: 300; }
+  .footer-col h5 { color: white; font-size: 0.85rem; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 20px; font-weight: 500; }
+  .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  .footer-col ul li a { color: rgba(255,255,255,0.55); text-decoration: none; font-size: 0.88rem; transition: color 0.3s; }
+  .footer-col ul li a:hover { color: var(--sky); }
+  .footer-bottom {
+    border-top: 1px solid rgba(255,255,255,0.1); padding-top: 32px;
+    display: flex; align-items: center; justify-content: space-between; font-size: 0.82rem;
+  }
+
+
+  /* ── CONSULTATION POPUP ── */
+  .popup-overlay {
+    position: fixed; inset: 0; z-index: 10000;
+    background: rgba(10,42,74,0.65); backdrop-filter: blur(6px);
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.35s ease; padding: 20px;
+  }
+  .popup-overlay.active { opacity: 1; pointer-events: all; }
+  .popup-box {
+    background: white; border-radius: 28px; max-width: 560px; width: 100%;
+    padding: 52px 48px; position: relative;
+    box-shadow: 0 40px 100px rgba(10,42,74,0.3);
+    transform: translateY(30px) scale(0.96);
+    transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1); overflow: hidden;
+  }
+  .popup-overlay.active .popup-box { transform: translateY(0) scale(1); }
+  .popup-box::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 5px;
+    background: linear-gradient(90deg, var(--sky), var(--coral), var(--sky));
+  }
+  .popup-box::after {
+    content: '🐠'; position: absolute; top: 18px; right: 64px;
+    font-size: 2.2rem; opacity: 0.15; pointer-events: none;
+  }
+  .popup-close {
+    position: absolute; top: 18px; right: 20px;
+    width: 36px; height: 36px; border-radius: 50%;
+    border: 1.5px solid rgba(93,173,226,0.25); background: var(--pearl);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem; color: var(--mid); transition: all 0.2s; line-height: 1;
+  }
+  .popup-close:hover { background: var(--sky); color: white; border-color: var(--sky); }
+  .popup-eyebrow {
+    font-size: 0.72rem; letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--sky); font-weight: 500; margin-bottom: 10px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .popup-eyebrow::before { content: ''; width: 22px; height: 1.5px; background: var(--sky); }
+  .popup-box h2 { font-family: 'Playfair Display', serif; font-size: 1.9rem; color: var(--deep); line-height: 1.2; margin-bottom: 8px; }
+  .popup-box > p { font-size: 0.88rem; color: var(--mid); font-weight: 300; line-height: 1.6; margin-bottom: 32px; }
+  .consult-form { display: flex; flex-direction: column; gap: 16px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group label { font-size: 0.78rem; font-weight: 500; color: var(--mid); letter-spacing: 0.04em; text-transform: uppercase; }
+  .form-group input, .form-group select, .form-group textarea {
+    padding: 13px 16px; border: 1.5px solid rgba(93,173,226,0.25); border-radius: 12px;
+    font-family: 'DM Sans', sans-serif; font-size: 0.9rem; color: var(--deep);
+    background: var(--pearl); outline: none;
+    transition: border-color 0.25s, box-shadow 0.25s; cursor: text;
+  }
+  .form-group select { }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+    border-color: var(--sky); box-shadow: 0 0 0 3px rgba(93,173,226,0.12); background: white;
+  }
+  .form-group textarea { resize: vertical; min-height: 88px; line-height: 1.5; }
+  .form-group input::placeholder, .form-group textarea::placeholder { color: rgba(26,82,118,0.35); }
+  .submit-btn {
+    margin-top: 6px; padding: 16px 32px; border-radius: 50px;
+    background: var(--mid); color: white; border: none;
+    font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 500;
+    letter-spacing: 0.04em; transition: all 0.3s;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    box-shadow: 0 8px 28px rgba(26,82,118,0.28);
+  }
+  .submit-btn:hover { background: var(--sky); transform: translateY(-2px); box-shadow: 0 14px 36px rgba(93,173,226,0.35); }
+  .submit-btn span { font-size: 1.1rem; }
+  .popup-success { display: none; flex-direction: column; align-items: center; text-align: center; gap: 14px; padding: 20px 0 10px; }
+  .popup-success.show { display: flex; }
+  .success-icon { font-size: 3.5rem; animation: popIn 0.5s cubic-bezier(0.34,1.56,0.64,1); }
+  @keyframes popIn { from { transform: scale(0); } to { transform: scale(1); } }
+  .popup-success h3 { font-family: 'Playfair Display', serif; font-size: 1.5rem; color: var(--deep); }
+  .popup-success p { font-size: 0.9rem; color: var(--mid); font-weight: 300; max-width: 320px; line-height: 1.6; }
+
+  /* ── HAMBURGER BUTTON ── */
+  .nav-toggle {
+    display: none; flex-direction: column; justify-content: center;
+    gap: 5px; width: 36px; height: 36px; background: none;
+    border: none; padding: 4px; cursor: pointer; z-index: 200;
+  }
+  .nav-toggle span {
+    display: block; width: 100%; height: 2px;
+    background: var(--mid); border-radius: 2px;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+  }
+  .nav-toggle.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .nav-toggle.open span:nth-child(2) { opacity: 0; }
+  .nav-toggle.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+  /* ── MOBILE NAV DRAWER ── */
+  @media (max-width: 900px) {
+    nav { padding: 16px 24px; }
+    nav.scrolled { padding: 12px 24px; }
+    .nav-toggle { display: flex; }
+
+    .nav-links {
+      display: flex; flex-direction: column; gap: 0;
+      position: fixed; top: 0; right: -100%; width: min(300px, 80vw);
+      height: 100vh; background: white; z-index: 150;
+      padding: 80px 32px 40px;
+      box-shadow: -8px 0 40px rgba(10,42,74,0.15);
+      transition: right 0.35s cubic-bezier(0.4,0,0.2,1);
+      overflow-y: auto;
+    }
+    .nav-links.open { right: 0; }
+
+    .nav-links li { border-bottom: 1px solid rgba(93,173,226,0.1); }
+    .nav-links li:last-child { border-bottom: none; margin-top: 16px; }
+
+    .nav-links a {
+      display: block; padding: 14px 0 14px;
+      font-size: 1rem; color: var(--mid);
+    }
+    .nav-links a::after { bottom: 0; }
+
+    .nav-cta {
+      display: inline-block; margin-top: 4px;
+      padding: 12px 28px 12px 28px !important;
+      border-radius: 50px; text-align: center; width: 100%;
+    }
+
+    /* Overlay behind drawer */
+    .nav-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(10,42,74,0.4); z-index: 140;
+      backdrop-filter: blur(2px);
+    }
+    .nav-overlay.open { display: block; }
+  }
+
+  /* ── MOBILE GENERAL ── */
+  @media (max-width: 768px) {
+    .hero { padding: 100px 24px 80px; }
+    .hero-timeline { gap: 0; flex-wrap: wrap; justify-content: center; row-gap: 16px; }
+    .ht-line { width: 24px; }
+    #steps, #timeline, #ongoing, #cta { padding: 70px 20px; }
+    .step-item { grid-template-columns: 56px 1fr; gap: 16px; padding: 32px 0; }
+    .step-circle { width: 48px; height: 48px; font-size: 1.2rem; }
+    .timeline-grid { grid-template-columns: 1fr 1fr; gap: 16px; }
+    .tl-card::after { display: none; }
+    .care-options { grid-template-columns: 1fr; gap: 16px; }
+    .popup-box { padding: 36px 22px; }
+    .form-row { grid-template-columns: 1fr; }
+    .cta-group { flex-direction: column; align-items: center; }
+    .detail-pill { padding: 8px 12px; }
+  }
+
+  /* ── RESPONSIVE FOOTER ── */
+  @media (max-width: 900px) {
+    footer { padding: 60px 32px 32px; }
+    .footer-top {
+      grid-template-columns: 1fr 1fr;
+      gap: 36px 28px;
+    }
+    .footer-brand { grid-column: 1 / -1; }
+    .footer-brand p { max-width: 100%; }
+  }
+  @media (max-width: 520px) {
+    footer { padding: 48px 20px 28px; }
+    .footer-top {
+      grid-template-columns: 1fr;
+      gap: 28px;
+    }
+    .footer-brand { grid-column: auto; }
+    .footer-bottom {
+      flex-direction: column; gap: 8px; text-align: center;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- ══════ CONSULTATION POPUP ══════ -->
+<div class="popup-overlay" id="consultPopup">
+  <div class="popup-box">
+    <button class="popup-close" id="popupClose" title="Close">✕</button>
+    <div id="formContent">
+      <div class="popup-eyebrow">Free Consultation</div>
+      <h2>Book Your<br>Aquarium Consultation</h2>
+      <p>Tell us about your space and vision — our expert aquarists will reach out within 24 hours to design your perfect tank.</p>
+      <div class="consult-form" id="consultForm">
+        <div class="form-row">
+          <div class="form-group"><label>First Name</label><input type="text" placeholder="e.g. Sarah" id="fname"></div>
+          <div class="form-group"><label>Last Name</label><input type="text" placeholder="e.g. Khan" id="lname"></div>
+        </div>
+        <div class="form-group"><label>Email Address</label><input type="email" placeholder="you@example.com" id="email"></div>
+        <div class="form-group"><label>Phone Number</label><input type="tel" placeholder="+92 300 0000000" id="phone"></div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Tank Type</label>
+            <select id="tankType">
+              <option value="">Select a type…</option>
+              <option>Freshwater Tank</option>
+              <option>Marine / Reef Tank</option>
+              <option>Nano Aquarium</option>
+              <option>Custom Built-in</option>
+              <option>Office / Commercial</option>
+              <option>Not sure yet</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Preferred Date</label><input type="date" id="prefDate"></div>
+        </div>
+        <div class="form-group">
+          <label>Tell us about your space</label>
+          <textarea placeholder="e.g. Living room wall, approx 2m wide. Looking for a reef setup with colourful fish…" id="message"></textarea>
+        </div>
+        <button class="submit-btn" id="submitBtn">Book Free Consultation <span>🐟</span></button>
+      </div>
+    </div>
+    <div class="popup-success" id="successMsg">
+      <div class="success-icon">🎉</div>
+      <h3>You're all booked in!</h3>
+      <p>Thank you! One of our expert aquarists will contact you within 24 hours to discuss your dream aquarium.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ NAV  ══════ -->
+<div class="nav-overlay" id="navOverlay"></div>
+<nav id="navbar">
+  <a href="Home.html" class="logo"><span>🐟</span> AquaWorld</a>
+  <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
+    <span></span><span></span><span></span>
+  </button>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="Home.html">Home</a></li>
+    <li><a href="about.html">About Us</a></li>
+    <li><a href="features.html">Features</a></li>
+    <li><a href="collection.html">Collection</a></li>
+    <li><a href="aquariums.html">Aquarium</a></li>
+    <li><a href="process.html" class="active">Process</a></li>
+    <li><a href="reviews.html">Reviews</a></li>
+    <li><a href="#" class="nav-cta" id="openConsult">Contact Us</a></li>
+  </ul>
+</nav>
+
+<!-- ══════ HERO ══════ -->
+<section class="hero">
+  <div class="hero-bubble"></div>
+  <div class="hero-bubble"></div>
+  <div class="hero-bubble"></div>
+  <div class="hero-bubble"></div>
+  <svg class="wave-divider" viewBox="0 0 1440 80" preserveAspectRatio="none" style="height:80px;">
+    <path d="M0,60 C240,20 480,80 720,50 C960,20 1200,70 1440,40 L1440,80 L0,80 Z" fill="white"/>
+  </svg>
+  <div style="position:relative;z-index:1;text-align:center;">
+    <div class="hero-eyebrow">How It Works</div>
+    <h1 class="hero-title reveal">Your Journey to a<br><em>Perfect Aquarium</em></h1>
+    <p class="hero-sub reveal">From first consultation to ongoing care — our structured 4-step process ensures your aquarium thrives from day one, without the guesswork.</p>
+    <div class="hero-timeline reveal">
+      <div class="ht-step"><div class="ht-num">01</div><span>Consult</span></div>
+      <div class="ht-line"></div>
+      <div class="ht-step"><div class="ht-num">02</div><span>Design</span></div>
+      <div class="ht-line"></div>
+      <div class="ht-step"><div class="ht-num">03</div><span>Install</span></div>
+      <div class="ht-line"></div>
+      <div class="ht-step"><div class="ht-num">04</div><span>Care</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════ STEPS ══════ -->
+<section id="steps">
+  <div class="steps-header reveal">
+    <div class="section-label">Step by Step</div>
+    <h2 class="section-title">Four Steps to Aquatic Bliss</h2>
+    <p class="section-sub">We've refined our process over 13 years to remove complexity and put you in complete control at every stage.</p>
+  </div>
+  <div class="step-list">
+
+    <div class="step-item reveal">
+      <div class="step-num-col">
+        <div class="step-circle">🧭</div>
+        <div class="step-connector"></div>
+      </div>
+      <div>
+        <span class="step-tag">Step 01</span>
+        <h3>Consultation</h3>
+        <p>We start with a free 30-minute video call with one of our certified aquarists. You'll share your vision, space dimensions, and lifestyle — and we'll map out the perfect system for you. No obligation, no jargon.</p>
+        <div class="step-detail">
+          <div class="detail-pill"><strong>30 min</strong>Duration</div>
+          <div class="detail-pill"><strong>Free</strong>Cost</div>
+          <div class="detail-pill"><strong>Online</strong>Format</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="step-item reveal">
+      <div class="step-num-col">
+        <div class="step-circle">✏️</div>
+        <div class="step-connector"></div>
+      </div>
+      <div>
+        <span class="step-tag">Step 02</span>
+        <h3>Custom Design</h3>
+        <p>Our design team produces a 3D render of your aquarium within 48 hours. You'll get full control over aquascape layout, species selection, lighting palette, and cabinet finish — all visualised before anything is built.</p>
+        <div class="step-detail">
+          <div class="detail-pill"><strong>48 hrs</strong>Turnaround</div>
+          <div class="detail-pill"><strong>3D Render</strong>Included</div>
+          <div class="detail-pill"><strong>Unlimited</strong>Revisions</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="step-item reveal">
+      <div class="step-num-col">
+        <div class="step-circle">🔧</div>
+        <div class="step-connector"></div>
+      </div>
+      <div>
+        <span class="step-tag">Step 03</span>
+        <h3>Delivery & Setup</h3>
+        <p>Our installation team delivers, builds, and aquascapes your tank — handling plumbing, electrical, substrate, rock, and initial water chemistry. We cycle the tank and ensure it's biologically ready before a single fish arrives.</p>
+        <div class="step-detail">
+          <div class="detail-pill"><strong>1–2 days</strong>Installation</div>
+          <div class="detail-pill"><strong>2–4 weeks</strong>Tank Cycle</div>
+          <div class="detail-pill"><strong>Included</strong>Full Setup</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="step-item reveal">
+      <div class="step-num-col">
+        <div class="step-circle">🌿</div>
+      </div>
+      <div>
+        <span class="step-tag">Step 04</span>
+        <h3>Monthly Ongoing Care</h3>
+        <p>Choose from our flexible maintenance plans. Our aquarists visit monthly (or more) to perform water changes, pruning, equipment checks, and health assessments — so your tank always looks showroom-perfect.</p>
+        <div class="step-detail">
+          <div class="detail-pill"><strong>Monthly</strong>Visits</div>
+          <div class="detail-pill"><strong>24/7</strong>App Support</div>
+          <div class="detail-pill"><strong>No Lock-in</strong>Contracts</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══════ TIMELINE VISUAL ══════ -->
+<section id="timeline">
+  <div class="timeline-header reveal">
+    <div class="section-label">What to Expect</div>
+    <h2 class="section-title">Your First Month Timeline</h2>
+    <p class="section-sub">Here's how the first 30 days look from booking to a fully stocked, thriving aquarium.</p>
+  </div>
+  <div class="timeline-grid">
+    <div class="tl-card reveal stagger-1">
+      <span class="tl-icon">📅</span>
+      <div class="tl-step-num">Day 1</div>
+      <h4>Book & Consult</h4>
+      <p>Meet your dedicated aquarist online and share your vision for the perfect build.</p>
+      <span class="tl-duration">30 minutes</span>
+    </div>
+    <div class="tl-card reveal stagger-2">
+      <span class="tl-icon">🎨</span>
+      <div class="tl-step-num">Day 3</div>
+      <h4>Receive Your Design</h4>
+      <p>Full 3D aquascape render and species list delivered to your inbox for review.</p>
+      <span class="tl-duration">48 hour turnaround</span>
+    </div>
+    <div class="tl-card reveal stagger-3">
+      <span class="tl-icon">🚚</span>
+      <div class="tl-step-num">Day 7–9</div>
+      <h4>Delivery & Install</h4>
+      <p>Tank delivered, built, scaped, and cycled by our professional installation crew.</p>
+      <span class="tl-duration">1–2 days on-site</span>
+    </div>
+    <div class="tl-card reveal stagger-4">
+      <span class="tl-icon">🐠</span>
+      <div class="tl-step-num">Day 21–30</div>
+      <h4>Livestock Arrives</h4>
+      <p>Once the tank is biologically ready, your chosen species are carefully introduced.</p>
+      <span class="tl-duration">After cycle complete</span>
+    </div>
+  </div>
+</section>
+
+<!-- ══════ ONGOING CARE PLANS ══════ -->
+<section id="ongoing">
+  <div class="section-label reveal">Maintenance Plans</div>
+  <h2 class="section-title reveal">Ongoing Care That Fits<br>Your Lifestyle</h2>
+  <p class="section-sub reveal">No lock-in contracts. Cancel or upgrade any time. Every plan includes our app monitoring and emergency call-outs.</p>
+  <div class="care-options">
+
+    <div class="care-plan reveal stagger-1">
+      <span class="plan-icon">🌱</span>
+      <div class="plan-name">Essential</div>
+      <div class="plan-price">$79<small>/month</small></div>
+      <p class="plan-desc">For smaller tanks and experienced hobbyists who want a safety net.</p>
+      <ul class="plan-features">
+        <li>Monthly aquarist visit</li>
+        <li>Water testing & report</li>
+        <li>Filter & equipment check</li>
+        <li>App monitoring access</li>
+      </ul>
+      <a href="#" class="btn-plan outline" id="openConsult2">Get Started</a>
+    </div>
+
+    <div class="care-plan featured-plan reveal stagger-2">
+      <span class="plan-icon">🪸</span>
+      <div class="plan-name">Complete</div>
+      <div class="plan-price">$149<small>/month</small></div>
+      <p class="plan-desc">Our most popular plan for reef and community tanks. Worry-free ownership.</p>
+      <ul class="plan-features">
+        <li>Bi-monthly aquarist visits</li>
+        <li>Full water changes included</li>
+        <li>Coral & plant pruning</li>
+        <li>Priority emergency callout</li>
+        <li>Species replacement warranty</li>
+      </ul>
+      <a href="#" class="btn-plan solid" id="openConsult3">Get Started</a>
+    </div>
+
+    <div class="care-plan reveal stagger-3">
+      <span class="plan-icon">🌊</span>
+      <div class="plan-name">Premier</div>
+      <div class="plan-price">$299<small>/month</small></div>
+      <p class="plan-desc">White glove care for large installations, commercial spaces, and serious collectors.</p>
+      <ul class="plan-features">
+        <li>Weekly aquarist visits</li>
+        <li>Dedicated account manager</li>
+        <li>Full aquascape resets (quarterly)</li>
+        <li>24/7 emergency support</li>
+        <li>Annual livestock refresh</li>
+      </ul>
+      <a href="#" class="btn-plan outline" id="openConsult4">Get Started</a>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══════ CTA ══════ -->
+<section id="cta">
+  <div class="section-label reveal">Begin Today</div>
+  <h2 class="section-title reveal">Book Your Free<br>Consultation</h2>
+  <p class="section-sub reveal">30 minutes with a certified aquarist. No cost, no commitment. Just expert advice tailored to your space and goals.</p>
+  <div class="cta-group reveal">
+    <a href="#" class="btn-white" id="openConsult5">Book a Consultation</a>
+    <a href="file:///C:/Users/owais/Downloads/website%20fish%20aquarium/collection.html" class="btn-outline-white">Browse Tanks →</a>
+  </div>
+</section>
+
+<!-- ══════ FOOTER ══════ -->
+<footer>
+  <div class="footer-top">
+    <div class="footer-brand">
+      <a href="Home.html" class="logo"><span>🐟</span> AquaWorld</a>
+      <p>Creating stunning underwater worlds for homes, offices and public spaces since 2008. Certified, ethical, extraordinary.</p>
+    </div>
+    <div class="footer-col">
+      <h5>Aquariums</h5>
+      <ul>
+        <li><a href="collection.html">Nano Cube 30L</a></li>
+        <li><a href="collection.html">Reef Panorama 200L</a></li>
+        <li><a href="collection.html">Dutch Planted 120L</a></li>
+        <li><a href="collection.html">Blackwater Biotope 180L</a></li>
+        <li><a href="collection.html">Apex Wall Display 600L</a></li>
+        <li><a href="collection.html">Iwagumi Office Divider 350L</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h5>Services</h5>
+      <ul>
+        <li><a href="#">Tank Installation</a></li>
+        <li><a href="#">Monthly Maintenance</a></li>
+        <li><a href="#">Aquascape Design</a></li>
+        <li><a href="#">Water Testing</a></li>
+        <li><a href="#">Emergency Callout</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h5>Company</h5>
+      <ul>
+        <li><a href="Home.html">Home</a></li>
+        <li><a href="about.html">About Us</a></li>
+        <li><a href="features.html">Features</a></li>
+        <li><a href="collection.html">Collection</a></li>
+        <li><a href="aquariums.html">Aquarium</a></li>
+        <li><a href="process.html">Process</a></li>
+        <li><a href="reviews.html">Reviews</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2026 AquaWorld. Designed and Developed by Maryam, Hania, Muntaha and Ayesha</p>
+  </div>
+</footer>
+
+<script>
+// ── SCROLL PROGRESS ──
+const pbar = document.getElementById('progressBar');
+window.addEventListener('scroll', () => {
+  const h = document.documentElement;
+  pbar.style.width = (window.scrollY / (h.scrollHeight - h.clientHeight)) * 100 + '%';
+});
+
+// ── NAV SCROLL ──
+const navbar = document.getElementById('navbar');
+window.addEventListener('scroll', () => {
+  navbar.classList.toggle('scrolled', window.scrollY > 60);
+});
+
+// ── HAMBURGER MENU ──
+const navToggle = document.getElementById('navToggle');
+const navLinks  = document.getElementById('navLinks');
+const navOverlay = document.getElementById('navOverlay');
+
+function openNav() {
+  navToggle.classList.add('open');
+  navLinks.classList.add('open');
+  navOverlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeNav() {
+  navToggle.classList.remove('open');
+  navLinks.classList.remove('open');
+  navOverlay.classList.remove('open');
+  document.body.style.overflow = '';
+}
+navToggle.addEventListener('click', () => {
+  navLinks.classList.contains('open') ? closeNav() : openNav();
+});
+navOverlay.addEventListener('click', closeNav);
+navLinks.querySelectorAll('a:not(.nav-cta)').forEach(a => a.addEventListener('click', closeNav));
+
+// ── SCROLL REVEAL ──
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.12 });
+document.querySelectorAll('.reveal,.reveal-left,.reveal-right').forEach(el => observer.observe(el));
+
+// ── POPUP ──
+const popup = document.getElementById('consultPopup');
+const popupClose = document.getElementById('popupClose');
+const submitBtn = document.getElementById('submitBtn');
+const formContent = document.getElementById('formContent');
+const successMsg = document.getElementById('successMsg');
+
+function openPopup(e) {
+  if (e) e.preventDefault();
+  popup.classList.add('active');
+  document.body.style.overflow = 'hidden';
+  formContent.style.display = '';
+  successMsg.classList.remove('show');
+}
+function closePopup() {
+  popup.classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+['openConsult','openConsult2','openConsult3','openConsult4','openConsult5'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('click', openPopup);
+});
+popupClose.addEventListener('click', closePopup);
+popup.addEventListener('click', e => { if (e.target === popup) closePopup(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closePopup(); });
+submitBtn.addEventListener('click', () => {
+  const fname = document.getElementById('fname').value.trim();
+  const email = document.getElementById('email').value.trim();
+  if (!fname) { document.getElementById('fname').focus(); return; }
+  if (!email || !email.includes('@')) { document.getElementById('email').focus(); return; }
+  formContent.style.display = 'none';
+  successMsg.classList.add('show');
+  setTimeout(() => closePopup(), 3500);
+});
+</script>
+</body>
+</html>
